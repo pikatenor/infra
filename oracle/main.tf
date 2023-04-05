@@ -7,7 +7,7 @@ module "vcn" {
 
   label_prefix  = "yotsuboshi"
   vcn_dns_label = "yotsuboshi"
-  vcn_cidrs     = ["10.10.0.0/16"]
+  vcn_cidrs     = local.vcn_cidrs.yotsuboshi
 
   create_internet_gateway = true
   create_nat_gateway      = true
@@ -17,4 +17,116 @@ module "vcn" {
   local_peering_gateways       = null
   nat_gateway_route_rules      = null
 
+}
+
+resource "oci_core_security_list" "private-security-list" {
+  compartment_id = local.root_compartment_id
+  vcn_id         = module.vcn.vcn_id
+  display_name   = "security-list-for-private-subnet"
+
+  egress_security_rules {
+    stateless        = false
+    destination      = "0.0.0.0/0"
+    destination_type = "CIDR_BLOCK"
+    protocol         = "all"
+  }
+  ingress_security_rules {
+    stateless   = false
+    source      = "0.0.0.0/0"
+    source_type = "CIDR_BLOCK"
+    protocol    = "1"
+    icmp_options {
+      type = 3
+      code = 4
+    }
+  }
+  dynamic "ingress_security_rules" {
+    for_each = toset(local.vcn_cidrs.yotsuboshi)
+    content {
+      stateless   = false
+      source      = ingress_security_rules.value
+      source_type = "CIDR_BLOCK"
+      protocol    = "1"
+      icmp_options {
+        type = 3
+      }
+    }
+  }
+  dynamic "ingress_security_rules" {
+    for_each = toset(local.vcn_cidrs.yotsuboshi)
+    content {
+      stateless   = false
+      source      = ingress_security_rules.value
+      source_type = "CIDR_BLOCK"
+      protocol    = "6"
+      tcp_options {
+        min = 22
+        max = 22
+      }
+    }
+  }
+}
+
+resource "oci_core_security_list" "public-security-list" {
+  compartment_id = local.root_compartment_id
+  vcn_id         = module.vcn.vcn_id
+  display_name   = "security-list-for-public-subnet"
+
+  egress_security_rules {
+    stateless        = false
+    destination      = "0.0.0.0/0"
+    destination_type = "CIDR_BLOCK"
+    protocol         = "all"
+  }
+  ingress_security_rules {
+    stateless   = false
+    source      = "0.0.0.0/0"
+    source_type = "CIDR_BLOCK"
+    protocol    = "1"
+    icmp_options {
+      type = 3
+      code = 4
+    }
+  }
+  dynamic "ingress_security_rules" {
+    for_each = toset(local.vcn_cidrs.yotsuboshi)
+    content {
+      stateless   = false
+      source      = ingress_security_rules.value
+      source_type = "CIDR_BLOCK"
+      protocol    = "1"
+      icmp_options {
+        type = 3
+      }
+    }
+  }
+
+  ingress_security_rules {
+    stateless   = false
+    source      = "0.0.0.0/0"
+    source_type = "CIDR_BLOCK"
+    protocol    = "6"
+    tcp_options {
+      min = 22
+      max = 22
+    }
+  }
+}
+
+resource "oci_core_subnet" "public-subnet" {
+  compartment_id    = local.root_compartment_id
+  vcn_id            = module.vcn.vcn_id
+  cidr_block        = "10.10.0.0/24"
+  route_table_id    = module.vcn.ig_route_id
+  security_list_ids = [oci_core_security_list.public-security-list.id]
+  display_name      = "public-subnet"
+}
+
+resource "oci_core_subnet" "private-subnet" {
+  compartment_id    = local.root_compartment_id
+  vcn_id            = module.vcn.vcn_id
+  cidr_block        = "10.10.1.0/24"
+  route_table_id    = module.vcn.nat_route_id
+  security_list_ids = [oci_core_security_list.private-security-list.id]
+  display_name      = "private-subnet"
 }
