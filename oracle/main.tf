@@ -5,9 +5,8 @@ module "vcn" {
   compartment_id = local.root_compartment_id
   region         = "ap-tokyo-1"
 
-  vcn_name      = "yotsuboshi"
-  vcn_dns_label = "yotsuboshi"
   label_prefix  = "yotsuboshi"
+  vcn_dns_label = "yotsuboshi"
   vcn_cidrs     = ["10.10.0.0/16"]
 
   create_internet_gateway = true
