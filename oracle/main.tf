@@ -130,3 +130,55 @@ resource "oci_core_subnet" "private-subnet" {
   security_list_ids = [oci_core_security_list.private-security-list.id]
   display_name      = "private-subnet"
 }
+
+resource "oci_containerengine_cluster" "oke25" {
+  compartment_id     = local.root_compartment_id
+  kubernetes_version = "v1.25.4"
+  name               = "yuzu"
+  vcn_id             = module.vcn.vcn_id
+
+  options {
+    add_ons {
+      is_kubernetes_dashboard_enabled = false
+      is_tiller_enabled               = false
+    }
+    kubernetes_network_config {
+      pods_cidr     = "10.244.0.0/16"
+      services_cidr = "10.96.0.0/16"
+    }
+    service_lb_subnet_ids = [oci_core_subnet.public-subnet.id]
+  }
+}
+
+resource "oci_containerengine_node_pool" "oke25-node-pool" {
+  cluster_id         = oci_containerengine_cluster.oke25.id
+  compartment_id     = local.root_compartment_id
+  kubernetes_version = "v1.25.4"
+
+  name = "yuzu-pool1"
+
+  node_config_details {
+    placement_configs {
+      availability_domain = data.oci_identity_availability_domains.ads.availability_domains[0].name
+      subnet_id           = oci_core_subnet.private-subnet.id
+    }
+    size = 1
+  }
+  node_shape = "VM.Standard.A1.Flex"
+  node_shape_config {
+    memory_in_gbs = 8
+    ocpus         = 1
+  }
+  node_source_details {
+    # Oracle-Linux-8.7-aarch64-2023.01.31-3-OKE-1.25.4-549
+    image_id    = "ocid1.image.oc1.ap-tokyo-1.aaaaaaaad6dof5conwtja4eqhl5wvwzlsveixwnkt7spgpwqmjzan6umkr3a"
+    source_type = "image"
+  }
+
+  ssh_public_key = file("~/.ssh/OC.pub")
+
+  initial_node_labels {
+    key   = "name"
+    value = "yuzu-node"
+  }
+}
