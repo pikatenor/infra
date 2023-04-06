@@ -137,6 +137,13 @@ resource "oci_containerengine_cluster" "oke25" {
   name               = "yuzu"
   vcn_id             = module.vcn.vcn_id
 
+  endpoint_config {
+    is_public_ip_enabled = true
+    nsg_ids              = []
+    subnet_id            = oci_core_subnet.public-subnet.id
+  }
+
+
   options {
     add_ons {
       is_kubernetes_dashboard_enabled = false
