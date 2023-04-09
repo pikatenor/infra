@@ -37,6 +37,15 @@ resource "oci_core_subnet" "private-subnet" {
   display_name               = "private-subnet"
 }
 
+resource "oci_core_subnet" "oke-api-subnet" {
+  compartment_id    = local.root_compartment_id
+  vcn_id            = module.vcn.vcn_id
+  cidr_block        = "10.10.9.0/24"
+  route_table_id    = module.vcn.ig_route_id
+  security_list_ids = [oci_core_security_list.oke-api-security-list.id]
+  display_name      = "oke-k8sApiEndpoint-subnet-yuzu-regional"
+}
+
 resource "oci_core_security_list" "private-security-list" {
   compartment_id = local.root_compartment_id
   vcn_id         = module.vcn.vcn_id
@@ -131,11 +140,49 @@ resource "oci_core_security_list" "public-security-list" {
   }
 }
 
+resource "oci_core_security_list" "oke-api-security-list" {
+  compartment_id = local.root_compartment_id
+  vcn_id         = module.vcn.vcn_id
+  display_name   = "oke-k8sApiEndpoint-seclist-yuzu"
+  egress_security_rules {
+    description      = "Allow Kubernetes Control Plane to communicate with OKE"
+    destination      = "all-nrt-services-in-oracle-services-network"
+    destination_type = "SERVICE_CIDR_BLOCK"
+    protocol         = "6"
+    stateless        = false
+
+    tcp_options {
+      max = 443
+      min = 443
+    }
+  }
+
+  ingress_security_rules {
+    description = "External access to Kubernetes API endpoint"
+    protocol    = "6"
+    source      = "0.0.0.0/0"
+    source_type = "CIDR_BLOCK"
+    stateless   = false
+
+    tcp_options {
+      max = 6443
+      min = 6443
+    }
+  }
+
+}
+
 resource "oci_containerengine_cluster" "oke25" {
   compartment_id     = local.root_compartment_id
   kubernetes_version = "v1.25.4"
   name               = "yuzu"
   vcn_id             = module.vcn.vcn_id
+
+  endpoint_config {
+    is_public_ip_enabled = true
+    nsg_ids              = []
+    subnet_id            = oci_core_subnet.oke-api-subnet.id
+  }
 
   options {
     add_ons {
