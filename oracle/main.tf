@@ -106,6 +106,12 @@ resource "oci_core_security_list" "private-security-list" {
       }
     }
   }
+  ingress_security_rules {
+    stateless   = false
+    source      = local.vcn_cidrs.yotsuboshi_oke
+    source_type = "CIDR_BLOCK"
+    protocol    = "6"
+  }
 }
 
 resource "oci_core_security_list" "public-security-list" {
@@ -196,26 +202,49 @@ resource "oci_core_security_list" "oke-api-security-list" {
     destination_type = "SERVICE_CIDR_BLOCK"
     protocol         = "6"
     stateless        = false
-
     tcp_options {
       max = 443
       min = 443
     }
   }
-
   ingress_security_rules {
     description = "External access to Kubernetes API endpoint"
     protocol    = "6"
     source      = "0.0.0.0/0"
     source_type = "CIDR_BLOCK"
     stateless   = false
-
     tcp_options {
       max = 6443
       min = 6443
     }
   }
 
+  ingress_security_rules {
+    stateless   = false
+    source      = local.vcn_cidrs.yotsuboshi_private1
+    source_type = "CIDR_BLOCK"
+    protocol    = "1"
+    icmp_options {
+      type = 3
+      code = 4
+    }
+  }
+  ingress_security_rules {
+    protocol    = "6"
+    source      = local.vcn_cidrs.yotsuboshi_private1
+    source_type = "CIDR_BLOCK"
+    stateless   = false
+    tcp_options {
+      max = 12250
+      min = 12250
+    }
+  }
+  egress_security_rules {
+    destination      = local.vcn_cidrs.yotsuboshi_private1
+    destination_type = "CIDR_BLOCK"
+    protocol         = "6"
+    stateless        = false
+  }
 }
 
 resource "oci_containerengine_cluster" "oke25" {
