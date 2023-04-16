@@ -24,10 +24,6 @@ spec:
             - --entrypoints.websecure.Address=:443
             - --providers.kubernetesingress
             - --providers.kubernetescrd
-            - --certificatesresolvers.defaulttlsresolver.acme.tlschallenge
-            - --certificatesresolvers.defaulttlsresolver.acme.email=webmaster@p1kachu.net
-            - --certificatesresolvers.defaulttlsresolver.acme.storage=acme.json
-            - --certificatesresolvers.defaulttlsresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
           ports:
             - name: web
               containerPort: 80
