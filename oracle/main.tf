@@ -21,7 +21,7 @@ module "vcn" {
 resource "oci_core_subnet" "public-subnet" {
   compartment_id    = local.root_compartment_id
   vcn_id            = module.vcn.vcn_id
-  cidr_block        = "10.10.0.0/24"
+  cidr_block        = local.vcn_cidrs.yotsuboshi_public1
   route_table_id    = module.vcn.ig_route_id
   security_list_ids = [oci_core_security_list.public-security-list.id]
   display_name      = "public-subnet"
@@ -31,7 +31,7 @@ resource "oci_core_subnet" "private-subnet" {
   compartment_id             = local.root_compartment_id
   vcn_id                     = module.vcn.vcn_id
   prohibit_public_ip_on_vnic = true
-  cidr_block                 = "10.10.1.0/24"
+  cidr_block                 = local.vcn_cidrs.yotsuboshi_private1
   route_table_id             = module.vcn.nat_route_id
   security_list_ids          = [oci_core_security_list.private-security-list.id]
   display_name               = "private-subnet"
@@ -40,7 +40,7 @@ resource "oci_core_subnet" "private-subnet" {
 resource "oci_core_subnet" "oke-api-subnet" {
   compartment_id    = local.root_compartment_id
   vcn_id            = module.vcn.vcn_id
-  cidr_block        = "10.10.9.0/24"
+  cidr_block        = local.vcn_cidrs.yotsuboshi_oke
   route_table_id    = module.vcn.ig_route_id
   security_list_ids = [oci_core_security_list.oke-api-security-list.id]
   display_name      = "oke-k8sApiEndpoint-subnet-yuzu-regional"
@@ -92,6 +92,20 @@ resource "oci_core_security_list" "private-security-list" {
       }
     }
   }
+  dynamic "ingress_security_rules" {
+    for_each = toset(local.diff_k8s_ingress_rule_port)
+    content {
+      description = null
+      stateless   = false
+      source      = local.vcn_cidrs.yotsuboshi_public1
+      source_type = "CIDR_BLOCK"
+      protocol    = "6"
+      tcp_options {
+        min = ingress_security_rules.value
+        max = ingress_security_rules.value
+      }
+    }
+  }
 }
 
 resource "oci_core_security_list" "public-security-list" {
@@ -127,7 +141,19 @@ resource "oci_core_security_list" "public-security-list" {
       }
     }
   }
-
+  dynamic "egress_security_rules" {
+    for_each = toset(local.diff_k8s_ingress_rule_port)
+    content {
+      stateless        = false
+      destination      = local.vcn_cidrs.yotsuboshi_private1
+      destination_type = "CIDR_BLOCK"
+      protocol         = "6"
+      tcp_options {
+        min = egress_security_rules.value
+        max = egress_security_rules.value
+      }
+    }
+  }
   ingress_security_rules {
     stateless   = false
     source      = "0.0.0.0/0"
@@ -136,6 +162,26 @@ resource "oci_core_security_list" "public-security-list" {
     tcp_options {
       min = 22
       max = 22
+    }
+  }
+  ingress_security_rules {
+    stateless   = false
+    source      = "0.0.0.0/0"
+    source_type = "CIDR_BLOCK"
+    protocol    = "6"
+    tcp_options {
+      min = 80
+      max = 80
+    }
+  }
+  ingress_security_rules {
+    stateless   = false
+    source      = "0.0.0.0/0"
+    source_type = "CIDR_BLOCK"
+    protocol    = "6"
+    tcp_options {
+      min = 443
+      max = 443
     }
   }
 }
