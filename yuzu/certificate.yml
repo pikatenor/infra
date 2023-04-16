@@ -1,0 +1,49 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: yuzu-staging
+  namespace: default
+spec:
+  secretName: yuzu-staging
+  issuerRef:
+    name: letsencrypt-staging
+    kind: ClusterIssuer
+  commonName: yuzu.p1kachu.net
+  dnsNames:
+  - yuzu.p1kachu.net
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: yuzu-wild-staging
+  namespace: default
+  labels:
+    use-cloudflare-solver: 'true'
+spec:
+  secretName: yuzu-wild-staging
+  issuerRef:
+    name: letsencrypt-staging
+    kind: ClusterIssuer
+  commonName: yuzu.p1kachu.net
+  dnsNames:
+  - yuzu.p1kachu.net
+  - '*.yuzu.p1kachu.net'
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: yuzu-wild
+  namespace: default
+  labels:
+    use-cloudflare-solver: 'true'
+spec:
+  secretName: yuzu-wild
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+  commonName: yuzu.p1kachu.net
+  dnsNames:
+  - yuzu.p1kachu.net
+  - '*.yuzu.p1kachu.net'
