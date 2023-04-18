@@ -284,7 +284,7 @@ resource "oci_containerengine_node_pool" "oke25-node-pool" {
       availability_domain = data.oci_identity_availability_domains.ads.availability_domains[0].name
       subnet_id           = oci_core_subnet.private-subnet.id
     }
-    size = 1
+    size = 2
   }
   node_shape = "VM.Standard.A1.Flex"
   node_shape_config {
