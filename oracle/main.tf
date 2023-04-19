@@ -310,6 +310,7 @@ resource "oci_containerengine_node_pool" "oke25-node-pool" {
     placement_configs {
       availability_domain = data.oci_identity_availability_domains.ads.availability_domains[0].name
       subnet_id           = oci_core_subnet.private-subnet.id
+      fault_domains       = [data.oci_identity_fault_domains.fds.fault_domains[0].name]
     }
     size = 2
   }
