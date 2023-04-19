@@ -92,18 +92,34 @@ resource "oci_core_security_list" "private-security-list" {
       }
     }
   }
-  dynamic "ingress_security_rules" {
-    for_each = toset(local.diff_k8s_ingress_rule_port)
-    content {
-      description = null
-      stateless   = false
-      source      = local.vcn_cidrs.yotsuboshi_public1
-      source_type = "CIDR_BLOCK"
-      protocol    = "6"
-      tcp_options {
-        min = ingress_security_rules.value
-        max = ingress_security_rules.value
-      }
+
+  ingress_security_rules {
+    description = "k8s worker internal"
+    stateless   = false
+    source      = local.vcn_cidrs.yotsuboshi_private1
+    source_type = "CIDR_BLOCK"
+    protocol    = "all"
+  }
+  ingress_security_rules {
+    description = "to kube-proxy from LB"
+    stateless   = false
+    source      = local.vcn_cidrs.yotsuboshi_public1
+    source_type = "CIDR_BLOCK"
+    protocol    = "6"
+    tcp_options {
+      min = 10256
+      max = 10256
+    }
+  }
+  ingress_security_rules {
+    description = "to k8s from LB"
+    stateless   = false
+    source      = local.vcn_cidrs.yotsuboshi_public1
+    source_type = "CIDR_BLOCK"
+    protocol    = "6"
+    tcp_options {
+      min = 30000
+      max = 32767
     }
   }
   ingress_security_rules {
@@ -147,19 +163,30 @@ resource "oci_core_security_list" "public-security-list" {
       }
     }
   }
-  dynamic "egress_security_rules" {
-    for_each = toset(local.diff_k8s_ingress_rule_port)
-    content {
-      stateless        = false
-      destination      = local.vcn_cidrs.yotsuboshi_private1
-      destination_type = "CIDR_BLOCK"
-      protocol         = "6"
-      tcp_options {
-        min = egress_security_rules.value
-        max = egress_security_rules.value
-      }
+
+  egress_security_rules {
+    description      = "from LB to kube-proxy"
+    destination      = local.vcn_cidrs.yotsuboshi_private1
+    destination_type = "CIDR_BLOCK"
+    protocol         = "6"
+    stateless        = false
+    tcp_options {
+      max = 10256
+      min = 10256
     }
   }
+  egress_security_rules {
+    description      = "from LB to k8s"
+    destination      = local.vcn_cidrs.yotsuboshi_private1
+    destination_type = "CIDR_BLOCK"
+    protocol         = "6"
+    stateless        = false
+    tcp_options {
+      min = 30000
+      max = 32767
+    }
+  }
+
   ingress_security_rules {
     stateless   = false
     source      = "0.0.0.0/0"
