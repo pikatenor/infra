@@ -77,7 +77,7 @@ metadata:
     heritage: Helm
     release: rancher
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: rancher
