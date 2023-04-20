@@ -360,3 +360,51 @@ resource "oci_containerengine_node_pool" "oke25-node-pool" {
     value = "yuzu-node"
   }
 }
+
+resource "oci_objectstorage_bucket" "rancher-backup" {
+  #Required
+  compartment_id = local.root_compartment_id
+  name           = "rancher-backup"
+  namespace      = data.oci_objectstorage_namespace.ns.namespace
+}
+resource "oci_identity_group" "rancher-backup-access" {
+  compartment_id = local.root_compartment_id
+  name           = "ObjectStorageAccess-rancher-backup"
+  description    = "user group for rancher-backup"
+}
+resource "oci_identity_user_group_membership" "rancher-backup-s3-user-backup-access" {
+  group_id = oci_identity_group.rancher-backup-access.id
+  user_id  = oci_identity_user.rancher-backup-s3-user.id
+}
+resource "oci_identity_user" "rancher-backup-s3-user" {
+  compartment_id = local.root_compartment_id
+  description    = "user for rancher-backup-s3"
+  name           = "rancher-backup-s3-user"
+}
+resource "oci_identity_customer_secret_key" "rancher-backup-s3-user-key" {
+  display_name = "s3-key"
+  user_id      = oci_identity_user.rancher-backup-s3-user.id
+}
+resource "oci_identity_user_capabilities_management" "rancher-backup-s3-user" {
+  user_id                      = oci_identity_user.rancher-backup-s3-user.id
+  can_use_api_keys             = "false"
+  can_use_auth_tokens          = "false"
+  can_use_console_password     = "false"
+  can_use_customer_secret_keys = "true"
+  can_use_smtp_credentials     = "false"
+}
+resource "oci_identity_policy" "rancher-backup-policy" {
+  compartment_id = local.root_compartment_id
+  name           = "ObjectStorageAccess-rancher-backup-policy"
+  description    = "allow bucket access to ObjectStorageAccess-rancher-backup user group"
+  statements = [
+    "Allow group ObjectStorageAccess-rancher-backup to read buckets in tenancy",
+    join("", [
+      "Allow group ObjectStorageAccess-rancher-backup to manage objects in tenancy ",
+      "where all {",
+      "any { request.permission='OBJECT_CREATE', request.permission='OBJECT_INSPECT' }, ",
+      "target.bucket.name='rancher-backup'",
+      "}",
+    ])
+  ]
+}
