@@ -4,6 +4,12 @@ terraform {
       source = "oracle/oci"
     }
   }
+  cloud {
+    organization = "pikatenor"
+    workspaces {
+      name = "oracle"
+    }
+  }
 }
 
 provider "oci" {
