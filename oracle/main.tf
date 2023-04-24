@@ -381,10 +381,10 @@ resource "oci_identity_user" "rancher-backup-s3-user" {
   description    = "user for rancher-backup-s3"
   name           = "rancher-backup-s3-user"
 }
-resource "oci_identity_customer_secret_key" "rancher-backup-s3-user-key" {
-  display_name = "s3-key"
-  user_id      = oci_identity_user.rancher-backup-s3-user.id
-}
+#resource "oci_identity_customer_secret_key" "rancher-backup-s3-user-key" {
+#  display_name = "s3-key"
+#  user_id      = oci_identity_user.rancher-backup-s3-user.id
+#}
 resource "oci_identity_user_capabilities_management" "rancher-backup-s3-user" {
   user_id                      = oci_identity_user.rancher-backup-s3-user.id
   can_use_api_keys             = "false"
