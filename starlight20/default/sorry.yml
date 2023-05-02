@@ -67,3 +67,30 @@ spec:
   selector:
     workload.user.cattle.io/workloadselector: deployment-default-sorry
 
+# ---
+# 
+# this ingress is created, managed by rancher
+# 
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   annotations:
+#     traefik.ingress.kubernetes.io/router.priority: '1' # lowest priority.
+#   name: default
+#   namespace: default
+# spec:
+#   defaultBackend:
+#     service:
+#       name: sorry
+#       port:
+#         number: 80
+#   rules:
+#     - http:
+#         paths:
+#           - backend:
+#               service:
+#                 name: sorry
+#                 port:
+#                   number: 80
+#             path: /
+#             pathType: Prefix

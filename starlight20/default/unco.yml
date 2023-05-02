@@ -7,7 +7,7 @@ metadata:
   name: unco
   namespace: default
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       workload.user.cattle.io/workloadselector: deployment-default-unco
@@ -72,19 +72,25 @@ spec:
     workload.user.cattle.io/workloadselector: deployment-default-unco
 
 ---
-# created, managed by rancher
-#apiVersion: networking.k8s.io/v1
-#kind: Ingress
-#metadata:
-#  name: unco
-#  namespace: default
-#spec:
-#  defaultBackend:
-#    service:
-#      name: unco
-#      port:
-#        number: 80
-#  tls:
-#    {}
-#  backend:
-#    {}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+  traefik.ingress.kubernetes.io/router.priority: '2' # 2nd lowest priority
+  name: unco
+  namespace: default
+spec:
+  rules:
+    - http:
+        paths:
+          - backend:
+              service:
+                name: unco
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix 
+  tls:
+    {}
+  backend:
+    {}
