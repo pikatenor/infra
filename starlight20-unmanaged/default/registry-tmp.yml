@@ -10,10 +10,7 @@ spec:
     matchLabels:
       workload.user.cattle.io/workloadselector: deployment-registry-registry
   strategy:
-    rollingUpdate:
-      maxSurge: 0
-      maxUnavailable: 25%
-    type: RollingUpdate
+    type: Recreate
   template:
     metadata:
       labels:
