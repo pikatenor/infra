@@ -1,0 +1,48 @@
+variant: fcos
+version: 1.0.0
+
+passwd:
+  users:
+    - name: pikatenor
+      ssh_authorized_keys:
+        - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC36FbIqKHklUPt+++qn8ZsMZsofIzFEIx33MiWTkAMOQhycW9t9zo6QXgOMogwB6xal5DLFWo87ETEqJH5TP38BF0AJRewDpVSrXoYHNvmAwQ7OGc7XP7XYwO+sznUUWSmKWUJseq8qYLys4tIupOJsS7zrgjxuQBv94UlTwK3eQm/fyT5Hdute0qcDeJ46cX+yBxg1wQn2a0lnSyv5WSA7XuKTIHCMeQftyg6/pRlXlpSlB/L2g1l8vBo96aFKYq2CWi+Ot70IDx+SwI1pafNmH2KUpQikcf2eATD/CSdKwm3siWs/AgEOh1zxxU2RGTFT49SUWHjvwW1xATJa5+/ pikatenor@Minerva5"
+      groups: [ sudo, docker ]
+
+systemd:
+  units:
+    - name: set-private.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Set VPC private address
+        After=network-online.target
+        Wants=network-online.target
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/bash -c "set -x; set -eo pipefail; metadata=$(curl -fsSL http://169.254.169.254/v1.json); private_device=$(nmcli d show | grep 'GENERAL.DEVICE' | grep 'en' | tail -n1 | awk '{print $2}'); private_address=$(echo $metadata | jq -r '.interfaces[] | select(.[\"network-type\"]==\"private\") | .ipv4.address'); nmcli con add type ethernet con-name private-net ifname $private_device ethernet.mtu 1450 ip4 $private_address/24"
+        [Install]
+        WantedBy=multi-user.target
+    - name: set-hostname.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Set Hostname
+        After=network-online.target
+        Wants=network-online.target
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/bash -c "set -x; set -eo pipefail; hostnamectl set-hostname $(curl -fsSL http://169.254.169.254/v1.json | jq -r .hostname); "
+        [Install]
+        WantedBy=multi-user.target
+    - name: write-private-ip.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Write Private IP address for k3s
+        After=network-online.target
+        Wants=network-online.target
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/bash -c "echo -e \"PRIVATE_IP=$(curl -fsSL http://169.254.169.254/v1.json | jq -r '.interfaces[] | select(.[\"network-type\"]==\"private\") | .ipv4.address')\nPRIVATE_DEVICE=$(ls -1 /sys/class/net | grep en | tail -n1)\" > /etc/default/k3s"
+        [Install]
+        WantedBy=multi-user.target
