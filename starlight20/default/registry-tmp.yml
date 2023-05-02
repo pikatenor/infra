@@ -38,8 +38,7 @@ spec:
           value: "true"
         ports:
         - containerPort: 5000
-          hostPort: 5000 #FIXME: use service nodeport
-          name: 5000tcp50000
+          name: 5000tcp
           protocol: TCP
         livenessProbe:
           failureThreshold: 3
@@ -74,7 +73,7 @@ spec:
           secretName: htpasswd #FIXME: なんとかする
       - hostPath:
           path: /var/registry
-          type: DirectoryOrCreate
+          type: Directory
         name: registry
       - name: certs
         secret:
@@ -82,3 +81,20 @@ spec:
           optional: false
           secretName: wild-cert #FIXME: use ingress tls
       nodeName: rin
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: registry
+  namespace: default
+spec:
+  ports:
+  - name: 5000tcp
+    nodePort: 5000
+    port: 5000
+    protocol: TCP
+    targetPort: 5000
+  selector:
+    workload.user.cattle.io/workloadselector: deployment-registry-registry
+  type: NodePort
