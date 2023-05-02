@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  labels:
-    field.cattle.io/projectId: p-g9knh
-    kubernetes.io/metadata.name: default
-  name: shared
