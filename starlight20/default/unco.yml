@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    cattle.io/creator: norman
+    workload.user.cattle.io/workloadselector: deployment-default-unco
+  name: unco
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: deployment-default-unco
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        banterin/restart: "2022-05-31T02:20:32+00:00"
+      labels:
+        workload.user.cattle.io/workloadselector: deployment-default-unco
+    spec:
+      containers:
+      - name: unco
+        image: registry.p1kachu.net:5000/unco
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 80
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 2
+          successThreshold: 1
+          timeoutSeconds: 2
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 80
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 2
+          successThreshold: 2
+          timeoutSeconds: 2
+        resources: {}
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+      - name: p1kachu
+      restartPolicy: Always
+      schedulerName: default-scheduler
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: unco
+spec:
+  ports:
+    - name: web
+      port: 80
+      targetPort: web
+  selector:
+    workload.user.cattle.io/workloadselector: deployment-default-unco
