@@ -76,12 +76,13 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
-  traefik.ingress.kubernetes.io/router.priority: '2' # 2nd lowest priority
+    traefik.ingress.kubernetes.io/router.priority: '2' # 2nd lowest priority
   name: unco
   namespace: default
 spec:
   rules:
-    - http:
+    - host: p1kachu.net
+      http:
         paths:
           - backend:
               service:
