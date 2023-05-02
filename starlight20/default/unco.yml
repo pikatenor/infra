@@ -65,8 +65,26 @@ metadata:
   name: unco
 spec:
   ports:
-    - name: web
+    - name: http
       port: 80
-      targetPort: web
+      targetPort: http
   selector:
     workload.user.cattle.io/workloadselector: deployment-default-unco
+
+---
+# created, managed by rancher
+#apiVersion: networking.k8s.io/v1
+#kind: Ingress
+#metadata:
+#  name: unco
+#  namespace: default
+#spec:
+#  defaultBackend:
+#    service:
+#      name: unco
+#      port:
+#        number: 80
+#  tls:
+#    {}
+#  backend:
+#    {}
