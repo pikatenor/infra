@@ -36,3 +36,21 @@ resource "vultr_instance" "starlight22" {
   vpc_ids           = [vultr_vpc.hnd3.id]
   user_data         = file("ignition.ign")
 }
+
+resource "vultr_reverse_ipv4" "starlight20" {
+  instance_id = vultr_instance.starlight20.id
+  ip          = vultr_instance.starlight20.main_ip
+  reverse     = "starlight20.sr0.dev"
+}
+
+resource "vultr_reverse_ipv4" "starlight21" {
+  instance_id = vultr_instance.starlight21.id
+  ip          = vultr_instance.starlight21.main_ip
+  reverse     = "starlight21.sr0.dev"
+}
+
+resource "vultr_reverse_ipv4" "starlight22" {
+  instance_id = vultr_instance.starlight22.id
+  ip          = vultr_instance.starlight22.main_ip
+  reverse     = "starlight22.sr0.dev"
+}
