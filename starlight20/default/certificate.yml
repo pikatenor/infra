@@ -23,6 +23,27 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
+  name: wild-cert
+  namespace: default
+  labels:
+    use-cloudflare-solver: 'true'
+spec:
+  secretName: wild-cert
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+  commonName: p1kachu.net
+  dnsNames:
+    - p1kachu.net
+    - '*.p1kachu.net'
+    - '*.app.p1kachu.net'
+    - xn--gckj0erd4d.net
+    - '*.xn--gckj0erd4d.net'
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
   name: zeropixel-cert
   namespace: default
   labels:
