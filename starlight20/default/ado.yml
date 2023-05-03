@@ -47,6 +47,19 @@ spec:
       - name: p1kachu
 
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ado
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: 9292tcp802
+  selector:
+    workload.user.cattle.io/workloadselector: deployment-default-ado
+
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
