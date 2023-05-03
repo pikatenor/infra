@@ -91,3 +91,13 @@ spec:
                   number: 80
             path: /
             pathType: Prefix 
+    - host: xn--gckj0erd4d.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: unco
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix 
