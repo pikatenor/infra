@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    workload.user.cattle.io/workloadselector: deployment-pikabot-retty
+  name: retty
+  namespace: pikabot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: deployment-pikabot-retty
+  template:
+    metadata:
+      labels:
+        workload.user.cattle.io/workloadselector: deployment-pikabot-retty
+    spec:
+      containers:
+      - name: pikabot
+        image: registry.p1kachu.net:5000/pikabot
+        imagePullPolicy: Always
+        env:
+        - name: DEFAULT_CHANNEL
+          value: '#times_pikatenor'
+        - name: GOOGLE_CSE_ID
+          value: 007703196459396889154:-xctrzgtt98
+        - name: LISTEN_PORT
+          value: "8877"
+        - name: REDIS_NAMESPACE
+          value: retty
+        - name: REDIS_URL
+          value: redis://redis.shared:6379/
+        - name: SLACK_AUTO_RECONNECT
+          value: "true"
+        ports:
+        - containerPort: 8877
+          name: http8877
+          protocol: TCP
+        resources: {}
+      imagePullSecrets:
+      - name: p1kachu
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: retty
+  namespace: pikabot
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 8877
+  selector:
+    workload.user.cattle.io/workloadselector: deployment-pikabot-retty
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pikabot-retty
+  namespace: default
+spec:
+  externalName: retty.pikabot.svc.cluster.local
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  type: ExternalName
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pikabot-retty
+  namespace: default
+spec:
+  rules:
+    - host: pikabot-retty.app.p1kachu.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: pikabot-retty
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix 
+  tls:
+    - hosts:
+        - pikabot-retty.app.p1kachu.net
+      secretName: wild-cert
