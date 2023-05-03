@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    workload.user.cattle.io/workloadselector: deployment-default-piping
+  name: piping
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: deployment-default-piping
+  template:
+    metadata:
+      labels:
+        workload.user.cattle.io/workloadselector: deployment-default-piping
+    spec:
+      containers:
+      - name: piping
+        image: nwtgck/piping-server
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: 8080tcp2
+          protocol: TCP
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 2
+          successThreshold: 1
+          tcpSocket:
+            port: 8080
+          timeoutSeconds: 2
+        resources: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: piping
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: http-alt
+  selector:
+    workload.user.cattle.io/workloadselector: deployment-default-piping
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: piping
+  namespace: default
+spec:
+  rules:
+    - host: piping.app.p1kachu.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: piping
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix 
+  tls:
+    - hosts:
+        - piping.app.p1kachu.net
+      secretName: wild-cert
