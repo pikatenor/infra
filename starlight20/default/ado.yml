@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    workload.user.cattle.io/workloadselector: deployment-default-ado
+  name: ado
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: deployment-default-ado
+  template:
+    metadata:
+      labels:
+        workload.user.cattle.io/workloadselector: deployment-default-ado
+    spec:
+      containers:
+      - name: ado
+        image: registry.p1kachu.net:5000/ado
+        ports:
+        - containerPort: 9292
+          name: 9292tcp802
+          protocol: TCP
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz
+            port: 9292
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 2
+          successThreshold: 1
+          timeoutSeconds: 2
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz
+            port: 9292
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 2
+          successThreshold: 2
+          timeoutSeconds: 2
+        resources: {}
+      imagePullSecrets:
+      - name: p1kachu
