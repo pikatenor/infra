@@ -21,7 +21,7 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
-          name: 8080tcp2
+          name: http-alt
           protocol: TCP
         livenessProbe:
           failureThreshold: 3
