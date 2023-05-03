@@ -58,7 +58,7 @@ metadata:
   namespace: default
 spec:
   rules:
-    - host: qcumber.app.p1kachu.net
+    - host: qr.app.p1kachu.net
       http:
         paths:
           - backend:
@@ -70,5 +70,5 @@ spec:
             pathType: Prefix 
   tls:
     - hosts:
-        - qcumber.app.p1kachu.net
+        - qr.app.p1kachu.net
       secretName: wild-cert
