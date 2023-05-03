@@ -20,10 +20,20 @@ spec:
         image: registry.p1kachu.net:5000/pikabot
         imagePullPolicy: Always
         env:
+        - name: SLACK_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: retty
+              key: SLACK_TOKEN
         - name: DEFAULT_CHANNEL
           value: '#times_pikatenor'
         - name: GOOGLE_CSE_ID
           value: 007703196459396889154:-xctrzgtt98
+        - name: GOOGLE_CSE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: retty
+              key: GOOGLE_CSE_KEY
         - name: LISTEN_PORT
           value: "8877"
         - name: REDIS_NAMESPACE
