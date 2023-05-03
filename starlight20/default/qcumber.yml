@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    workload.user.cattle.io/workloadselector: deployment-default-qcumber
+  name: qcumber
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: deployment-default-qcumber
+  template:
+    metadata:
+      labels:
+        workload.user.cattle.io/workloadselector: deployment-default-qcumber
+    spec:
+      containers:
+      - name: qcumber
+        image: registry.p1kachu.net:5000/qcumber
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http-alt
+          protocol: TCP
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 2
+          successThreshold: 1
+          timeoutSeconds: 2
+        resources: {}
+      imagePullSecrets:
+      - name: p1kachu
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qcumber
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: http-alt
+  selector:
+    workload.user.cattle.io/workloadselector: deployment-default-qcumber
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: qcumber
+  namespace: default
+spec:
+  rules:
+    - host: qcumber.app.p1kachu.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: qcumber
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix 
+  tls:
+    - hosts:
+        - qcumber.app.p1kachu.net
+      secretName: wild-cert
