@@ -123,5 +123,5 @@ spec:
     protocol: TCP
     targetPort: http-alt
   selector:
-    workload.user.cattle.io/workloadselector: apps.deployment-shared-mongodb
+    workload.user.cattle.io/workloadselector: apps.deployment-shared-mongo-express
   type: ClusterIP
