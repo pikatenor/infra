@@ -338,14 +338,17 @@ resource "oci_containerengine_node_pool" "oke25-node-pool" {
     placement_configs {
       availability_domain = data.oci_identity_availability_domains.ads.availability_domains[0].name
       subnet_id           = oci_core_subnet.private-subnet.id
-      fault_domains       = [data.oci_identity_fault_domains.fds.fault_domains[0].name]
+      fault_domains = [
+        data.oci_identity_fault_domains.fds.fault_domains[0].name,
+        data.oci_identity_fault_domains.fds.fault_domains[1].name,
+      ]
     }
     size = 2
   }
   node_shape = "VM.Standard.A1.Flex"
   node_shape_config {
-    memory_in_gbs = 8
-    ocpus         = 1
+    memory_in_gbs = 12
+    ocpus         = 2
   }
   node_source_details {
     # Oracle-Linux-8.7-aarch64-2023.01.31-3-OKE-1.25.4-549
