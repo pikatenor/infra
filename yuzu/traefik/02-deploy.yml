@@ -25,6 +25,9 @@ spec:
             - --entrypoints.websecure.http.tls
             - --providers.kubernetesingress
             - --providers.kubernetescrd
+            - --ping=true
+            - --ping.entrypoint=ping
+            - --entrypoints.ping.Address=:9000
           ports:
             - name: web
               containerPort: 80
@@ -32,6 +35,28 @@ spec:
               containerPort: 443
             - name: dashboard
               containerPort: 8080
+            - name: ping
+              containerPort: 9000
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /ping
+              port: ping
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /ping
+              port: ping
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 3
+            successThreshold: 1
+            timeoutSeconds: 1
           resources:
             limits:
               memory: "64Mi"
