@@ -38,7 +38,7 @@ spec:
             - name: ping
               containerPort: 9000
           readinessProbe:
-            failureThreshold: 3
+            failureThreshold: 6
             httpGet:
               path: /ping
               port: ping
