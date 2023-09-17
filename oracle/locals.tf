@@ -12,6 +12,7 @@ locals {
 
   diff_k8s_ingress_rule_port = [
     31486,
+    31561,
     32292,
   ]
 }
