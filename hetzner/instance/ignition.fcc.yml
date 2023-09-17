@@ -1,0 +1,52 @@
+variant: fcos
+version: 1.0.0
+
+passwd:
+  users:
+    - name: pikatenor
+      ssh_authorized_keys:
+        - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC36FbIqKHklUPt+++qn8ZsMZsofIzFEIx33MiWTkAMOQhycW9t9zo6QXgOMogwB6xal5DLFWo87ETEqJH5TP38BF0AJRewDpVSrXoYHNvmAwQ7OGc7XP7XYwO+sznUUWSmKWUJseq8qYLys4tIupOJsS7zrgjxuQBv94UlTwK3eQm/fyT5Hdute0qcDeJ46cX+yBxg1wQn2a0lnSyv5WSA7XuKTIHCMeQftyg6/pRlXlpSlB/L2g1l8vBo96aFKYq2CWi+Ot70IDx+SwI1pafNmH2KUpQikcf2eATD/CSdKwm3siWs/AgEOh1zxxU2RGTFT49SUWHjvwW1xATJa5+/ pikatenor@Minerva5"
+      groups: [ sudo, docker ]
+
+systemd:
+  units:
+    - name: set-private.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Set private interface metrics
+        After=network-online.target
+        Wants=network-online.target
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/bash -c "set -x; set -eo pipefail; NEW_METRIC=999; DEVICE=ens10; nmcli connection modify $(nmcli -t -f UUID,DEVICE connection show | grep $DEVICE | cut -d: -f1) ipv4.route-metric $NEW_METRIC; nmcli device reapply $DEVICE"
+        [Install]
+        WantedBy=multi-user.target
+    - name: set-hostname.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Set Hostname
+        After=set-private.target
+        Wants=network-online.target
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/bash -c "set -x; set -eo pipefail; curl -fsSL http://169.254.169.254/ > /dev/null; hostnamectl set-hostname $(curl -fsSL http://169.254.169.254/latest/meta-data/hostname); "
+        Restart=on-failure
+        RestartSec=1
+        [Install]
+        WantedBy=multi-user.target
+    - name: write-private-ip.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Write Private IP address for k3s
+        After=set-private.target
+        Wants=network-online.target
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/bash -c "set -x; set -eo pipefail; curl -fsSL http://169.254.169.254/ > /dev/null; IP_ADDRESS=$(curl -fsSL http://169.254.169.254/latest/meta-data/private-networks | awk -F': ' '/ip:/{print $2} {}'); echo -e \"PRIVATE_IP=$IP_ADDRESS\nPRIVATE_DEVICE=$(nmcli -t -f GENERAL.DEVICE,IP4.ADDRESS device show | awk -v RS= -F'\n' -v ip="$IP_ADDRESS" '$0 ~ ip {for (i=1; i<=NF; i++) if ($i ~ /GENERAL.DEVICE/) {gsub(\"GENERAL.DEVICE:\", \"\", $i); print $i}}')\" > /etc/default/k3s"
+        Restart=on-failure
+        RestartSec=1
+        [Install]
+        WantedBy=multi-user.target

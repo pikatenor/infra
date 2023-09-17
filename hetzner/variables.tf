@@ -1,4 +1,4 @@
 variable "hcloud_token" {
-    type = string
-    sensitive = true
+  type      = string
+  sensitive = true
 }
