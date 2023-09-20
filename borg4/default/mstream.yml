@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    workload.user.cattle.io/workloadselector: deployment-default-mstream
+  name: mstream
+  namespace: default
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: deployment-default-mstream
+  template:
+    metadata:
+      labels:
+        workload.user.cattle.io/workloadselector: deployment-default-mstream
+    spec:
+      containers:
+      - env:
+        - name: PGID
+          value: "1000"
+        - name: PUID
+          value: "1000"
+        - name: TZ
+          value: Asia/Tokyo
+        - name: USE_JSON
+          value: "true"
+        image: ghcr.io/linuxserver/mstream
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 3000
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 2
+          successThreshold: 1
+          timeoutSeconds: 2
+        volumeMounts:
+        - mountPath: /config
+          name: config
+        - mountPath: /music
+          name: music
+          readOnly: true
+        ports:
+        - containerPort: 3000
+          name: http3000
+          protocol: TCP
+        name: mstream
+        resources: {}
+      nodeName: juno4a
+      volumes:
+      - hostPath:
+          path: /media/local/mstream-config
+          type: Directory
+        name: config
+      - hostPath:
+          path: /media/Hayate/Music/Banshee Music
+          type: Directory
+        name: music
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mstream
+  namespace: default
+spec:
+  ports:
+  - name: http3000
+    port: 80
+    protocol: TCP
+    targetPort: 3000
+  selector:
+    workload.user.cattle.io/workloadselector: deployment-default-mstream
+  sessionAffinity: None
+  type: LoadBalancer

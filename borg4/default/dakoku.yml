@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    workload.user.cattle.io/workloadselector: deployment-default-dakoku
+  name: dakoku
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: deployment-default-dakoku
+  template:
+    metadata:
+      labels:
+        workload.user.cattle.io/workloadselector: deployment-default-dakoku
+    spec:
+      containers:
+      - env:
+        - name: HOSTNAME
+          value: 0.0.0.0
+        - name: PORT
+          value: "8080"
+        envFrom:
+        - secretRef:
+            name: jinjer
+            optional: false
+        image: registry.p1kachu.net:5000/dakoku2
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 2
+          successThreshold: 1
+          timeoutSeconds: 2
+        ports:
+        - containerPort: 8080
+          name: http8080
+          protocol: TCP
+        name: dakoku
+        resources: {}
+      imagePullSecrets:
+      - name: p1kachu
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dakoku
+  namespace: default
+spec:
+  ports:
+  - name: http8080
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    workload.user.cattle.io/workloadselector: deployment-default-dakoku
+  type: LoadBalancer

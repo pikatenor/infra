@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    workload.user.cattle.io/workloadselector: deployment-default-mumbot
+  name: mumbot
+  namespace: default
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: deployment-default-mumbot
+  template:
+    metadata:
+      labels:
+        workload.user.cattle.io/workloadselector: deployment-default-mumbot
+    spec:
+      containers:
+      - env:
+        - name: SLACK_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: SLACK_API_TOKEN
+              name: slack-spl-gyubot
+        image: registry.p1kachu.net:5000/mumbot
+        imagePullPolicy: Always
+        name: mumbot
+        resources: {}
+      imagePullSecrets:
+      - name: p1kachu

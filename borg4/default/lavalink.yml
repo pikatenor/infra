@@ -1,0 +1,139 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lavalink-config
+  namespace: default
+data:
+  application.yml: |-
+    server: # REST and WS server
+      port: 8080
+      address: 0.0.0.0
+    lavalink:
+      server:
+        password: "crumpet-stuffy-encourage"
+        sources:
+          youtube: true
+          bandcamp: true
+          soundcloud: true
+          twitch: true
+          vimeo: true
+          http: true
+          local: true
+        bufferDurationMs: 400
+        youtubePlaylistLoadLimit: 6 # Number of pages at 100 each
+        playerUpdateInterval: 5 # How frequently to send player updates to clients, in seconds
+        youtubeSearchEnabled: true
+        soundcloudSearchEnabled: true
+        gc-warnings: true
+        #ratelimit:
+          #ipBlocks: ["1.0.0.0/8", "..."] # list of ip blocks
+          #excludedIps: ["...", "..."] # ips which should be explicit excluded from usage by lavalink
+          #strategy: "RotateOnBan" # RotateOnBan | LoadBalance | NanoSwitch | RotatingNanoSwitch
+          #searchTriggersFail: true # Whether a search 429 should trigger marking the ip as failing
+          #retryLimit: -1 # -1 = use default lavaplayer value | 0 = infinity | >0 = retry will happen this numbers times
+
+    metrics:
+      prometheus:
+        enabled: true
+        endpoint: /metrics
+
+    logging:
+      level:
+        root: INFO
+        lavalink: INFO
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    workload.user.cattle.io/workloadselector: deployment-default-lavalink
+  name: lavalink
+  namespace: default
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: deployment-default-lavalink
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        workload.user.cattle.io/workloadselector: deployment-default-lavalink
+    spec:
+      containers:
+      - image: fredboat/lavalink:dev-v7ab68938bb85e09e38cbccc0d5e133276969686e-SNAPSHOT
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 2
+          httpGet:
+            path: /metrics
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          successThreshold: 1
+          timeoutSeconds: 2
+        readinessProbe:
+          failureThreshold: 2
+          httpGet:
+            path: /metrics
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          successThreshold: 1
+          timeoutSeconds: 2
+        ports:
+        - containerPort: 8080
+          name: http-ws
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /opt/Lavalink/application.yml
+          name: config
+          subPath: application.yml
+        - mountPath: /music
+          name: music
+          readOnly: true
+        name: lavalink
+        resources: {}
+      dnsPolicy: ClusterFirst
+      nodeName: juno4a
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          defaultMode: 429
+          items:
+          - key: application.yml
+            mode: 511
+            path: application.yml
+          name: lavalink-config
+          optional: false
+        name: config
+      - hostPath:
+          path: /media/Hayate/Music/Banshee Music
+          type: Directory
+        name: music
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lavalink
+  namespace: default
+spec:
+  ports:
+  - name: http-ws
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    workload.user.cattle.io/workloadselector: deployment-default-lavalink
+  type: ClusterIP
