@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dereproxy
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: deployment-default-dereproxy
+  template:
+    metadata:
+      labels:
+        workload.user.cattle.io/workloadselector: deployment-default-dereproxy
+    spec:
+      containers:
+      - image: registry.p1kachu.net:5000/dereproxy
+        imagePullPolicy: Always
+        name: dereproxy
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        resources: {}
+      imagePullSecrets:
+      - name: p1kachu
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dereproxy
+  namespace: default
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    workload.user.cattle.io/workloadselector: deployment-default-dereproxy
+  type: LoadBalancer

@@ -1,0 +1,20 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: traefik
+  name: main-lb
+  annotations:
+    oci.oraclecloud.com/load-balancer-type: "lb"
+    service.beta.kubernetes.io/oci-load-balancer-shape: "10Mbps-Micro"
+spec:
+  type: LoadBalancer
+  ports:
+    - name: http
+      targetPort: web
+      port: 80
+    - name: https
+      targetPort: websecure
+      port: 443
+  selector:
+    app: traefik

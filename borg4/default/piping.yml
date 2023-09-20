@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    workload.user.cattle.io/workloadselector: deployment-default-piping
+  name: piping
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: deployment-default-piping
+  template:
+    metadata:
+      labels:
+        workload.user.cattle.io/workloadselector: deployment-default-piping
+    spec:
+      containers:
+      - image: nwtgck/piping-server
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 2
+          successThreshold: 1
+          timeoutSeconds: 2
+        name: piping
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        resources: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: piping
+  namespace: default
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    workload.user.cattle.io/workloadselector: deployment-default-piping
+  sessionAffinity: None
+  type: LoadBalancer

@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pyload
+  labels:
+    workload.user.cattle.io/workloadselector: apps.deployment-default-pyload
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: apps.deployment-default-pyload
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        workload.user.cattle.io/workloadselector: apps.deployment-default-pyload
+      namespace: default
+    spec:
+      containers:
+        - name: pyload-ng
+          image: lscr.io/linuxserver/pyload-ng
+          imagePullPolicy: Always
+          readinessProbe:
+            failureThreshold: 3
+            successThreshold: 1
+            initialDelaySeconds: 0
+            timeoutSeconds: 1
+            periodSeconds: 10
+            tcpSocket:
+              port: 8000
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: download
+              mountPath: /downloads
+          ports:
+            - name: http
+              protocol: TCP
+              containerPort: 8000
+            - name: click-n-load
+              protocol: TCP
+              containerPort: 9666
+          env:
+            - name: PUID
+              value: '1000'
+            - name: PGID
+              value: '1000'
+            - name: TZ
+              value: Asia/Tokyo
+          resources: {}
+      nodeName: juno4a
+      nodeSelector:
+        {}
+      restartPolicy: Always
+      volumes:
+        - hostPath:
+            type: DirectoryOrCreate
+            path: /media/local/pyload-config
+          name: config
+        - hostPath:
+            type: DirectoryOrCreate
+            path: /media/Hayate/Downloads/pyload
+          name: download
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pyload
+  namespace: default
+spec:
+  ports:
+  - name: http8000
+    port: 80
+    protocol: TCP
+    targetPort: 8000
+  - name: http9666
+    port: 9666
+    protocol: TCP
+    targetPort: 9666
+  selector:
+    workload.user.cattle.io/workloadselector: apps.deployment-default-pyload
+  sessionAffinity: None
+  type: LoadBalancer

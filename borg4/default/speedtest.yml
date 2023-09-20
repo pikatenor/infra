@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    workload.user.cattle.io/workloadselector: deployment-default-speedtest
+  name: speedtest
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: deployment-default-speedtest
+  template:
+    metadata:
+      labels:
+        workload.user.cattle.io/workloadselector: deployment-default-speedtest
+    spec:
+      containers:
+      - env:
+        - name: MODE
+          value: standalone
+        image: adolfintel/speedtest
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 80
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          successThreshold: 1
+          timeoutSeconds: 2
+        name: speedtest
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        resources: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: speedtest
+  namespace: default
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    workload.user.cattle.io/workloadselector: deployment-default-speedtest
+  sessionAffinity: None
+  type: LoadBalancer

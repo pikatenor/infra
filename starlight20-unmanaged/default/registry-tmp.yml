@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    workload.user.cattle.io/workloadselector: deployment-registry-registry
+  name: registry
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: deployment-registry-registry
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        workload.user.cattle.io/workloadselector: deployment-registry-registry
+    spec:
+      containers:
+      - name: registry
+        image: registry:2.6.2
+        imagePullPolicy: Always
+        env:
+        - name: REGISTRY_AUTH
+          value: htpasswd
+        - name: REGISTRY_AUTH_HTPASSWD_PATH
+          value: /run/secret/htpasswd
+        - name: REGISTRY_AUTH_HTPASSWD_REALM
+          value: Registry Realm
+        - name: REGISTRY_HTTP_TLS_CERTIFICATE
+          value: /certs/tls.crt
+        - name: REGISTRY_HTTP_TLS_KEY
+          value: /certs/tls.key
+        - name: REGISTRY_STORAGE_DELETE_ENABLED
+          value: "true"
+        ports:
+        - containerPort: 5000
+          hostPort: 5000 #FIXME: use service nodeport
+          name: 5000tcp50000
+          protocol: TCP
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 2
+          successThreshold: 1
+          tcpSocket:
+            port: 5000
+          timeoutSeconds: 2
+        readinessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 2
+          successThreshold: 2
+          tcpSocket:
+            port: 5000
+          timeoutSeconds: 2
+        volumeMounts:
+        - mountPath: /run/secret
+          name: htpasswd
+        - mountPath: /var/lib/registry
+          name: registry
+        - mountPath: /certs
+          name: certs
+        resources: {}
+      restartPolicy: Always
+      volumes:
+      - name: htpasswd
+        secret:
+          defaultMode: 256
+          optional: false
+          secretName: htpasswd #FIXME: なんとかする
+      - hostPath:
+          path: /var/registry
+          type: DirectoryOrCreate
+        name: registry
+      - name: certs
+        secret:
+          defaultMode: 256
+          optional: false
+          secretName: wild-cert #FIXME: use ingress tls
+      nodeName: rin

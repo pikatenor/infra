@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns-custom
+  namespace: kube-system
+data:
+  k8sexternal.server: |-
+    borg.dii:53 {
+      errors
+      health {
+        lameduck 5s
+      }
+      kubernetes
+      k8s_external borg.dii
+      reload
+    }

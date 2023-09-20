@@ -1,0 +1,17 @@
+replicas: 2
+ingress:
+  enabled: true
+  tls:
+    source: letsEncrypt
+letsEncrypt:
+  email: pikatenor@p1kachu.net
+  environment: production
+  ingress:
+    class: traefik
+bootstrapPassword: "muck-map-compress"
+hostname: rancher.yuzu.p1kachu.net
+
+global:
+  cattle:
+    psp:
+      enabled: false

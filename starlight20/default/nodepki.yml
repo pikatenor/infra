@@ -1,0 +1,140 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    workload.user.cattle.io/workloadselector: deployment-default-nodepki
+  name: nodepki
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: deployment-default-nodepki
+  template:
+    metadata:
+      labels:
+        workload.user.cattle.io/workloadselector: deployment-default-nodepki
+    spec:
+      containers:
+      - name: nodepki
+        image: registry.p1kachu.net:5000/nodepki:8868bb8
+        imagePullPolicy: Always
+        env:
+        - name: API_USERNAME
+          value: pikatenor
+        - name: API_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: htpasswd
+              name: htpasswd
+        ports:
+        - containerPort: 8080
+          name: apiserver
+          protocol: TCP
+        - containerPort: 2560
+          name: ocsp
+          protocol: TCP
+        - containerPort: 5000
+          name: webclient
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /opt/nodepki/nodepki/data
+          name: vol1
+          subPath: nodepki/data
+        - mountPath: /opt/nodepki/nodepki-client/data
+          name: vol1
+          subPath: nodepki-client/data
+        - mountPath: /opt/nodepki/nodepki-webclient/data
+          name: vol1
+          subPath: nodepki-webclient/data
+        - mountPath: /opt/nodepki/nodepki-client/out
+          name: vol1
+          subPath: nodepki-client/out
+        resources: {}
+      hostAliases:
+      - hostnames:
+        - ca.p1kachu.net
+        ip: 127.0.0.1
+      imagePullSecrets:
+      - name: p1kachu
+      restartPolicy: Always
+      volumes:
+      - name: vol1
+        persistentVolumeClaim:
+          claimName: nodepki
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nodepki
+  namespace: default
+spec:
+  ports:
+  - name: apiserver
+    port: 8080
+    protocol: TCP
+    targetPort: apiserver
+  - name: ocsp
+    port: 2560
+    protocol: TCP
+    targetPort: ocsp
+  - name: webclient
+    port: 5000
+    protocol: TCP
+    targetPort: webclient
+  selector:
+    workload.user.cattle.io/workloadselector: deployment-default-nodepki
+  type: ClusterIP
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nodepki
+  namespace: default
+spec:
+  rules:
+    - host: pki.p1kachu.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: nodepki
+                port:
+                  name: webclient
+            path: /
+            pathType: Prefix 
+  tls:
+    - hosts:
+        - pki.p1kachu.net
+      secretName: wild-cert
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nodepki-insecure
+  namespace: default
+spec:
+  rules:
+    - host: ocsp.p1kachu.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: nodepki
+                port:
+                  name: ocsp
+            path: /
+            pathType: Prefix 
+    - host: ca.p1kachu.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: nodepki
+                port:
+                  name: apiserver
+            path: /public
+            pathType: Prefix 
