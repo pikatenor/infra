@@ -6,7 +6,7 @@ metadata:
   name: rancher
   labels:
     app: rancher
-    chart: rancher-2.7.6
+    chart: rancher-2.7.9
     heritage: Helm
     release: rancher
 ---
@@ -17,9 +17,10 @@ metadata:
   name: rancher-config
   labels: 
     app: rancher
-    chart: rancher-2.7.6
+    chart: rancher-2.7.9
     heritage: Helm
     release: rancher
+    app.kubernetes.io/part-of: "rancher"
 data:
   priorityClassName:  rancher-critical
 ---
@@ -30,7 +31,7 @@ metadata:
   name: rancher
   labels:
     app: rancher
-    chart: rancher-2.7.6
+    chart: rancher-2.7.9
     heritage: Helm
     release: rancher
 subjects:
@@ -49,7 +50,7 @@ metadata:
   name: rancher
   labels:
     app: rancher
-    chart: rancher-2.7.6
+    chart: rancher-2.7.9
     heritage: Helm
     release: rancher
 spec:
@@ -73,7 +74,7 @@ metadata:
   annotations:
   labels:
     app: rancher
-    chart: rancher-2.7.6
+    chart: rancher-2.7.9
     heritage: Helm
     release: rancher
 spec:
@@ -120,7 +121,7 @@ spec:
           effect: "NoSchedule"
           operator: "Equal"
       containers:
-      - image: rancher/rancher:v2.7.6
+      - image: rancher/rancher:v2.7.9
         imagePullPolicy: IfNotPresent
         name: rancher
         ports:
@@ -166,7 +167,7 @@ metadata:
   name: rancher
   labels:
     app: rancher
-    chart: rancher-2.7.6
+    chart: rancher-2.7.9
     heritage: Helm
     release: rancher
   annotations:
@@ -199,7 +200,7 @@ metadata:
   name: rancher
   labels:
     app: rancher
-    chart: rancher-2.7.6
+    chart: rancher-2.7.9
     heritage: Helm
     release: rancher
 spec:
@@ -220,7 +221,7 @@ metadata:
   name: rancher-critical
   labels: 
     app: rancher
-    chart: rancher-2.7.6
+    chart: rancher-2.7.9
     heritage: Helm
     release: rancher
 value: 1000000000
@@ -235,7 +236,7 @@ metadata:
   namespace: cattle-system
   labels: 
     app: rancher
-    chart: rancher-2.7.6
+    chart: rancher-2.7.9
     heritage: Helm
     release: rancher
   annotations:
@@ -265,7 +266,7 @@ metadata:
   namespace: cattle-system
   labels: 
     app: rancher
-    chart: rancher-2.7.6
+    chart: rancher-2.7.9
     heritage: Helm
     release: rancher
   annotations:
@@ -376,7 +377,7 @@ metadata:
   name: rancher-post-delete
   labels: 
     app: rancher
-    chart: rancher-2.7.6
+    chart: rancher-2.7.9
     heritage: Helm
     release: rancher
   annotations:
@@ -422,7 +423,7 @@ metadata:
   name: rancher-post-delete
   labels: 
     app: rancher
-    chart: rancher-2.7.6
+    chart: rancher-2.7.9
     heritage: Helm
     release: rancher
   annotations:
@@ -446,7 +447,7 @@ metadata:
   namespace: cattle-system
   labels: 
     app: rancher
-    chart: rancher-2.7.6
+    chart: rancher-2.7.9
     heritage: Helm
     release: rancher
   annotations:
@@ -460,7 +461,7 @@ spec:
       name: rancher-post-delete
       labels: 
         app: rancher
-        chart: rancher-2.7.6
+        chart: rancher-2.7.9
         heritage: Helm
         release: rancher
     spec:
@@ -468,7 +469,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: rancher-post-delete
-          image: "rancher/shell:v0.1.20"
+          image: "rancher/shell:v0.1.21"
           imagePullPolicy: IfNotPresent
           securityContext:
             runAsUser: 0
