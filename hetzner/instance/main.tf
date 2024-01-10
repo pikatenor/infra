@@ -6,7 +6,7 @@ resource "hcloud_server" "this" {
   firewall_ids = var.firewall_ids
 
   # Image is ignored, as we boot into rescue mode, but is a required field
-  image    = "fedora-37"
+  image    = "fedora-38"
   rescue   = "linux64"
   ssh_keys = [data.hcloud_ssh_key.ssh-key.id]
 
