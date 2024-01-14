@@ -61,3 +61,24 @@ module "dream0" {
   firewall_ids    = [hcloud_firewall.default.id]
   private_ip_addr = "192.168.35.2"
 }
+
+module "dream1" {
+  source          = "./instance"
+  name            = "dream1"
+  server_type     = "cx11" # 1 Intel vCPUs, 2GB
+  ssh_key_id      = "11083624"
+  network_id      = hcloud_network.dream.id
+  firewall_ids    = [hcloud_firewall.default.id]
+  private_ip_addr = "192.168.35.3"
+}
+
+module "dream2" {
+  source          = "./instance"
+  name            = "dream2"
+  server_type     = "cx11" # 1 Intel vCPUs, 2GB
+  ssh_key_id      = "11083624"
+  network_id      = hcloud_network.dream.id
+  firewall_ids    = [hcloud_firewall.default.id]
+  private_ip_addr = "192.168.35.4"
+}
+
