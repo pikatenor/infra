@@ -1,0 +1,103 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    workload.user.cattle.io/workloadselector: deployment-default-gitea
+  name: gitea
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: deployment-default-gitea
+  template:
+    metadata:
+      labels:
+        workload.user.cattle.io/workloadselector: deployment-default-gitea
+    spec:
+      containers:
+      - name: gitea
+        image: gitea/gitea:1
+        imagePullPolicy: Always
+        env:
+        - name: DISABLE_REGISTRATION
+          value: "true"
+        - name: RUN_MODE
+          value: prod
+        - name: SSH_DOMAIN
+          value: git.p1kachu.net
+        - name: SSH_PORT
+          value: "30022"
+        - name: USER_GID
+          value: "1100"
+        - name: USER_UID
+          value: "1100"
+        volumeMounts:
+        - mountPath: /data
+          name: data
+        ports:
+        - containerPort: 3000
+          name: http3000
+          protocol: TCP
+        - containerPort: 30022
+          name: ssh30022
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 3000
+            scheme: HTTP
+          initialDelaySeconds: 3
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 3000
+            scheme: HTTP
+          initialDelaySeconds: 3
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        resources: {}
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: gitea
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gitea
+  namespace: default
+spec:
+  ports:
+  - name: 3000tcp02
+    port: 3000
+    protocol: TCP
+    targetPort: 3000
+  selector:
+    workload.user.cattle.io/workloadselector: deployment-default-gitea
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gitea-nodeport
+  namespace: default
+spec:
+  ports:
+  - name: 29418tcp300221
+    nodePort: 30022
+    port: 30022
+    protocol: TCP
+    targetPort: 30022
+  selector:
+    workload.user.cattle.io/workloadselector: deployment-default-gitea
+  type: NodePort

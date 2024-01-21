@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    workload.user.cattle.io/workloadselector: deployment-default-zero-pixel
+  name: zero-pixel
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: deployment-default-zero-pixel
+  template:
+    metadata:
+      labels:
+        workload.user.cattle.io/workloadselector: deployment-default-zero-pixel
+    spec:
+      containers:
+      - name: zero-pixel
+        image: registry.p1kachu.net:5000/zero-pixel
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 80
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 2
+          successThreshold: 1
+          timeoutSeconds: 2
+        resources: {}
+      imagePullSecrets:
+      - name: p1kachu
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zero-pixel
+  namespace: default
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    workload.user.cattle.io/workloadselector: deployment-default-zero-pixel
+  type: ClusterIP
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: zero-pixel
+  namespace: default
+spec:
+  rules:
+    - host: 0px.org
+      http:
+        paths:
+          - backend:
+              service:
+                name: zero-pixel
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix 
+  tls:
+    - hosts:
+        - 0px.org
+      secretName: zeropixel-cert
