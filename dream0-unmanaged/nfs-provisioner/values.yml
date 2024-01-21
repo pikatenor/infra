@@ -1,0 +1,12 @@
+storageClass:
+  defaultClass: true
+
+persistence:
+  enabled: false # emptyDir を手でいじってるから diff みて
+
+priorityClass:
+  create: true
+  value: 1000000
+
+nodeSelector:
+  kubernetes.io/hostname: seira
