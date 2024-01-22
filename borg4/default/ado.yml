@@ -58,26 +58,4 @@ spec:
       targetPort: 9292tcp802
   selector:
     workload.user.cattle.io/workloadselector: deployment-default-ado
-
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: ado
-  namespace: default
-spec:
-  rules:
-    - host: ad.app.p1kachu.net
-      http:
-        paths:
-          - backend:
-              service:
-                name: ado
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix 
-  tls:
-    - hosts:
-        - ad.app.p1kachu.net
-      secretName: wild-cert
+  type: LoadBalancer
