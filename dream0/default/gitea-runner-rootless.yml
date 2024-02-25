@@ -1,0 +1,87 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gitea-act-runner-rootless
+spec:
+  clusterIP: None
+  selector:
+    workload.user.cattle.io/workloadselector: gitea-act-runner-rootless
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    workload.user.cattle.io/workloadselector: gitea-act-runner-rootless
+  name: gitea-act-runner-rootless
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: gitea-act-runner-rootless
+  serviceName: gitea-act-runner-rootless
+  template:
+    metadata:
+      labels:
+        workload.user.cattle.io/workloadselector: gitea-act-runner-rootless
+    spec:
+      restartPolicy: Always
+      securityContext:
+        fsGroup: 1000
+      containers:
+      - name: runner
+        image: gitea/act_runner:nightly-dind-rootless
+        imagePullPolicy: Always
+        env:
+        - name: DOCKER_HOST
+          value: tcp://localhost:2376
+        - name: DOCKER_CERT_PATH
+          value: /certs/client
+        - name: DOCKER_TLS_VERIFY
+          value: "1"
+        - name: GITEA_INSTANCE_URL
+          value: http://gitea.default.svc.cluster.local:3000
+        - name: GITEA_RUNNER_REGISTRATION_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: gitea-runner-secret
+              key: registration-token
+        - name: GITEA_RUNNER_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: GITEA_RUNNER_LABELS
+          value: "dind-rootless:docker://myoung34/github-runner:ubuntu-focal"
+        - name: CONFIG_FILE
+          value: /config.yaml
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: gitea-act-runner-data
+          mountPath: /data
+        - name: config
+          mountPath: /config.yaml
+          subPath: config.yaml
+        resources: {}
+      volumes:
+        - name: config
+          configMap:
+            name: gitea-act-runner-config
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: starlight/role
+                    operator: In
+                    values:
+                      - member
+  volumeClaimTemplates:
+  - metadata:
+      name: gitea-act-runner-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      storageClassName: nfs
+      resources:
+        requests:
+          storage: 1Gi

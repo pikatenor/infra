@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gitea-act-runner-cacheserver-config
+data:
+  config.yaml: |-
+    log:
+      level: info
+
+    cache:
+      enabled: true
+      dir: "/actcache"
+      host: "0.0.0.0"
+      port: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    workload.user.cattle.io/workloadselector: gitea-act-runner-cache
+  name: gitea-act-runner-cache
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: gitea-act-runner-cache
+  template:
+    metadata:
+      labels:
+        workload.user.cattle.io/workloadselector: gitea-act-runner-cache
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: cache-server
+        image: gitea/act_runner:nightly
+        imagePullPolicy: Always
+        command: ["/sbin/tini", "--", "act_runner", "-c", "/config.yaml", "cache-server"]
+        volumeMounts:
+        - name: actcache
+          mountPath: /actcache
+        - mountPath: /config.yaml
+          name: config
+          subPath: config.yaml
+        resources: {}
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+      volumes:
+        - name: actcache
+          hostPath:
+            path: /var/lib/gitea-act-runner-cache
+            type: DirectoryOrCreate
+        - name: config
+          configMap:
+            name: gitea-act-runner-cacheserver-config
+      nodeSelector:
+        starlight/role: leader
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gitea-act-runner-cache
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+  selector:
+    workload.user.cattle.io/workloadselector: gitea-act-runner-cache
