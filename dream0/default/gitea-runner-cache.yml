@@ -10,7 +10,7 @@ data:
     cache:
       enabled: true
       dir: "/actcache"
-      host: "0.0.0.0"
+      host: "gitea-act-runner-cache.default.svc.cluster.local"
       port: 80
 ---
 apiVersion: apps/v1
