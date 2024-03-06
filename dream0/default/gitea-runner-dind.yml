@@ -49,11 +49,16 @@ spec:
               fieldPath: spec.nodeName
         - name: GITEA_RUNNER_LABELS
           value: "dind:docker://ghcr.io/catthehacker/ubuntu:act-latest"
+        - name: CONFIG_FILE
+          value: /config.yaml
         volumeMounts:
         - name: docker-certs
           mountPath: /certs
         - name: gitea-act-runner-data
           mountPath: /data
+        - name: config
+          mountPath: /config.yaml
+          subPath: config.yaml
       - name: daemon
         image: docker:23.0.6-dind
         env:
@@ -67,6 +72,9 @@ spec:
       volumes:
       - name: docker-certs
         emptyDir: {}
+      - name: config
+        configMap:
+          name: gitea-act-runner-config
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
