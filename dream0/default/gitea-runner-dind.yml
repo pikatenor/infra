@@ -48,7 +48,7 @@ spec:
             fieldRef:
               fieldPath: spec.nodeName
         - name: GITEA_RUNNER_LABELS
-          value: "dind:docker://myoung34/github-runner:ubuntu-focal"
+          value: "dind:docker://ghcr.io/catthehacker/ubuntu:act-latest"
         volumeMounts:
         - name: docker-certs
           mountPath: /certs

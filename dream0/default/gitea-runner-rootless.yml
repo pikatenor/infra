@@ -50,7 +50,7 @@ spec:
             fieldRef:
               fieldPath: spec.nodeName
         - name: GITEA_RUNNER_LABELS
-          value: "dind-rootless:docker://myoung34/github-runner:ubuntu-focal"
+          value: "dind-rootless:docker://ghcr.io/catthehacker/ubuntu:runner-latest"
         - name: CONFIG_FILE
           value: /config.yaml
         securityContext:
