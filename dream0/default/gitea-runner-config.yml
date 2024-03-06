@@ -68,7 +68,7 @@ data:
       # # Whether to use privileged mode or not when launching task containers (privileged mode is required for Docker-in-Docker).
       # privileged: false
       # # And other options to be used when the container is started (eg, --add-host=my.gitea.url:host-gateway).
-      # options:
+      options: "--add-host=host.docker.internal:host-gateway -v /certs:/certs"
       # # The parent directory of a job's working directory.
       # # If it's empty, /workspace will be used.
       # workdir_parent:
@@ -81,7 +81,8 @@ data:
       # # If you want to allow any volume, please use the following configuration:
       # # valid_volumes:
       # #   - '**'
-      # valid_volumes: []
+      valid_volumes:
+        - /certs
       # # overrides the docker client host with the specified one.
       # # If it's empty, act_runner will find an available docker host automatically.
       # # If it's "-", act_runner will find an available docker host automatically, but the docker host won't be mounted to the job containers and service containers.
