@@ -68,6 +68,8 @@ spec:
       - name: data
         persistentVolumeClaim:
           claimName: gitea
+  strategy:
+    type: Recreate
 
 ---
 apiVersion: v1
