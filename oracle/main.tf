@@ -1,6 +1,6 @@
 module "vcn" {
   source  = "oracle-terraform-modules/vcn/oci"
-  version = "3.5.3"
+  version = "3.6.0"
 
   compartment_id = local.root_compartment_id
   region         = "ap-tokyo-1"
