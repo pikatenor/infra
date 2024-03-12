@@ -12,7 +12,7 @@ data:
 
     log:
       # The level of logging, can be trace, debug, info, warn, error, fatal
-      level: info
+      level: warn
 
     runner:
       # # Where to store the registration result.
