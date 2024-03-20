@@ -1,0 +1,15 @@
+defaultNamespace: datadog
+
+helm:
+  repo: https://helm.datadoghq.com
+  chart: datadog
+  version: v3.58.1
+  values: 
+    registry: public.ecr.aws/datadog
+    datadog:
+      logLevel: INFO
+      apiKeyExistingSecret: datadog-secret
+      appKeyExistingSecret: datadog-secret
+      criSocketPath: /var/run/k3s/containerd/containerd.sock
+    kubeStateMetricsEnabled: true
+ 
