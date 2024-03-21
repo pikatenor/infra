@@ -7,9 +7,12 @@ helm:
   values: 
     registry: public.ecr.aws/datadog
     datadog:
-      logLevel: INFO
+      logLevel: WARN
       apiKeyExistingSecret: datadog-secret
       appKeyExistingSecret: datadog-secret
       criSocketPath: /var/run/k3s/containerd/containerd.sock
+      processAgent:
+        enabled: true
+        processCollection: true
     kubeStateMetricsEnabled: true
  
