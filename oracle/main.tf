@@ -420,7 +420,7 @@ resource "oci_identity_policy" "rancher-backup-policy" {
 
 resource "oci_objectstorage_bucket" "registry2" {
   compartment_id = local.root_compartment_id
-  name           = "resigtry2"
+  name           = "registry2"
   namespace      = data.oci_objectstorage_namespace.ns.namespace
 }
 resource "oci_identity_group" "registry2-access" {
