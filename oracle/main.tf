@@ -418,3 +418,46 @@ resource "oci_identity_policy" "rancher-backup-policy" {
   ]
 }
 
+resource "oci_objectstorage_bucket" "registry2" {
+  compartment_id = local.root_compartment_id
+  name           = "resigtry2"
+  namespace      = data.oci_objectstorage_namespace.ns.namespace
+}
+resource "oci_identity_group" "registry2-access" {
+  compartment_id = local.root_compartment_id
+  name           = "ObjectStorageAccess-registry2"
+  description    = "user group for rancher-backup"
+}
+resource "oci_identity_user_group_membership" "registry2-s3-user-registry2-access" {
+  group_id = oci_identity_group.registry2-access.id
+  user_id  = oci_identity_user.registry2-s3-user.id
+}
+resource "oci_identity_user" "registry2-s3-user" {
+  compartment_id = local.root_compartment_id
+  description    = "user for registry2 s3 compat access"
+  name           = "registry2-s3-user"
+}
+resource "oci_identity_customer_secret_key" "registry2-s3-user-key" {
+  display_name = "registry2-s3-key"
+  user_id      = oci_identity_user.registry2-s3-user.id
+}
+resource "oci_identity_user_capabilities_management" "registry2-s3-user" {
+  user_id                      = oci_identity_user.registry2-s3-user.id
+  can_use_api_keys             = "false"
+  can_use_auth_tokens          = "false"
+  can_use_console_password     = "false"
+  can_use_customer_secret_keys = "true"
+  can_use_smtp_credentials     = "false"
+}
+resource "oci_identity_policy" "registry2-policy" {
+  compartment_id = local.root_compartment_id
+  name           = "ObjectStorageAccess-registry2-policy"
+  description    = "allow bucket access to ${oci_identity_group.registry2-access.name} user group"
+  statements = [
+    "Allow group ${oci_identity_group.registry2-access.name} to read buckets in tenancy",
+    join("", [
+      "Allow group ${oci_identity_group.registry2-access.name} to manage objects in tenancy ",
+      "where target.bucket.name='${oci_objectstorage_bucket.registry2.name}'",
+    ])
+  ]
+}
