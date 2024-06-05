@@ -47,3 +47,18 @@ spec:
   dnsNames:
   - yuzu.p1kachu.net
   - '*.yuzu.p1kachu.net'
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: c-staging
+  namespace: default
+spec:
+  secretName: c-staging
+  issuerRef:
+    name: letsencrypt-staging
+    kind: ClusterIssuer
+  commonName: c.p1kachu.net
+  dnsNames:
+  - c.p1kachu.net
