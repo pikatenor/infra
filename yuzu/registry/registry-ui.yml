@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    workload.user.cattle.io/workloadselector: deployment-default-registry-ui
+  name: registry-ui
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: deployment-default-registry-ui
+  template:
+    metadata:
+      labels:
+        workload.user.cattle.io/workloadselector: deployment-default-registry-ui
+    spec:
+      containers:
+      - name: registry-ui
+        image: joxit/docker-registry-ui:main
+        imagePullPolicy: Always
+        env:
+        - name: SINGLE_REGISTRY
+          value: 'true'
+        - name: DELETE_IMAGES
+          value: 'true'
+        - name: SHOW_CONTENT_DIGEST
+          value: 'true'
+        - name: PULL_URL
+          value: https://c.p1kachu.net
+        - name: NGINX_PROXY_PASS_URL
+          value: http://registry.registry
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 2
+          successThreshold: 1
+          tcpSocket:
+            port: 80
+          timeoutSeconds: 2
+        resources: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: registry-ui
+  namespace: default
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+  selector:
+    workload.user.cattle.io/workloadselector: deployment-default-registry-ui
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: registry-ui
+  namespace: default
+spec:
+  rules:
+    - host: registry-ui.yuzu.p1kachu.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: registry-ui
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix 
+  tls:
+    - hosts:
+        - registry-ui.yuzu.p1kachu.net
+      secretName: yuzu-wild
