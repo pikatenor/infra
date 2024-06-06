@@ -25,7 +25,7 @@ spec:
     spec:
       containers:
       - name: unco
-        image: registry.p1kachu.net:5000/unco
+        image: c.p1kachu.net/unco
         imagePullPolicy: Always
         ports:
         - containerPort: 80
@@ -55,6 +55,7 @@ spec:
       dnsPolicy: ClusterFirst
       imagePullSecrets:
       - name: p1kachu
+      - name: c.p1kachu.net
       restartPolicy: Always
       schedulerName: default-scheduler
 

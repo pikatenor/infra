@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: ado
-        image: registry.p1kachu.net:5000/ado
+        image: c.p1kachu.net/ado
         ports:
         - containerPort: 9292
           name: 9292tcp802
@@ -45,6 +45,7 @@ spec:
         resources: {}
       imagePullSecrets:
       - name: p1kachu
+      - name: c.p1kachu.net
 
 ---
 apiVersion: v1

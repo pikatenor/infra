@@ -22,7 +22,7 @@ spec:
         workload.user.cattle.io/workloadselector: deployment-default-lavalink-musicbot
     spec:
       containers:
-      - image: registry.p1kachu.net:5000/lavalink-musicbot
+      - image: c.p1kachu.net/lavalink-musicbot
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 3
@@ -80,5 +80,6 @@ spec:
       dnsPolicy: ClusterFirst
       imagePullSecrets:
       - name: p1kachu
+      - name: c.p1kachu.net
       restartPolicy: Always
       terminationGracePeriodSeconds: 30

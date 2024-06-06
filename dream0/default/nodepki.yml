@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: nodepki
-        image: registry.p1kachu.net:5000/nodepki:8868bb8
+        image: c.p1kachu.net/nodepki:8868bb8
         imagePullPolicy: Always
         env:
         - name: API_USERNAME
@@ -57,6 +57,7 @@ spec:
         ip: 127.0.0.1
       imagePullSecrets:
       - name: p1kachu
+      - name: c.p1kachu.net
       restartPolicy: Always
       volumes:
       - name: vol1

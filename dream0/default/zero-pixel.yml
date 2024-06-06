@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: zero-pixel
-        image: registry.p1kachu.net:5000/zero-pixel
+        image: c.p1kachu.net/zero-pixel
         imagePullPolicy: Always
         ports:
         - containerPort: 80
@@ -36,6 +36,7 @@ spec:
         resources: {}
       imagePullSecrets:
       - name: p1kachu
+      - name: c.p1kachu.net
 
 ---
 apiVersion: v1
