@@ -62,13 +62,13 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: battle-saikoh-stg
+  name: battle-saikoh-cert
   namespace: default
 spec:
-  secretName: battle-saikoh-stg-cert
+  secretName: battle-saikoh-cert
   issuerRef:
     kind: ClusterIssuer
-    name: letsencrypt-staging
+    name: letsencrypt-production
   commonName: battle.saikoh.uk
   dnsNames:
   - battle.saikoh.uk
