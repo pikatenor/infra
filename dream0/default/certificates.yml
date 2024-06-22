@@ -57,3 +57,18 @@ spec:
   dnsNames:
   - 0px.org
   - '*.0px.org'
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: battle-saikoh-stg
+  namespace: default
+spec:
+  secretName: battle-saikoh-stg-cert
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-staging
+  commonName: battle.saikoh.uk
+  dnsNames:
+  - saikoh.uk
