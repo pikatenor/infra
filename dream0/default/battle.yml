@@ -64,7 +64,7 @@ metadata:
   namespace: default
 spec:
   rules:
-    - host: battle.saikoh.tk
+    - host: battle.saikoh.uk
       http:
         paths:
           - backend:
