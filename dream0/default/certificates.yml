@@ -71,4 +71,4 @@ spec:
     name: letsencrypt-staging
   commonName: battle.saikoh.uk
   dnsNames:
-  - saikoh.uk
+  - battle.saikoh.uk
