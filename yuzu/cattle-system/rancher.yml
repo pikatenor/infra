@@ -1,4 +1,18 @@
 ---
+# Source: rancher/templates/priorityClass.yaml
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: rancher-critical
+  labels: 
+    app: rancher
+    chart: rancher-2.8.2
+    heritage: Helm
+    release: rancher
+value: 1000000000
+globalDefault: false
+description: "Priority class used by pods critical to rancher's functionality."
+---
 # Source: rancher/templates/serviceAccount.yaml
 kind: ServiceAccount
 apiVersion: v1
@@ -6,7 +20,7 @@ metadata:
   name: rancher
   labels:
     app: rancher
-    chart: rancher-2.7.9
+    chart: rancher-2.8.2
     heritage: Helm
     release: rancher
 ---
@@ -17,7 +31,7 @@ metadata:
   name: rancher-config
   labels: 
     app: rancher
-    chart: rancher-2.7.9
+    chart: rancher-2.8.2
     heritage: Helm
     release: rancher
     app.kubernetes.io/part-of: "rancher"
@@ -31,7 +45,7 @@ metadata:
   name: rancher
   labels:
     app: rancher
-    chart: rancher-2.7.9
+    chart: rancher-2.8.2
     heritage: Helm
     release: rancher
 subjects:
@@ -50,7 +64,7 @@ metadata:
   name: rancher
   labels:
     app: rancher
-    chart: rancher-2.7.9
+    chart: rancher-2.8.2
     heritage: Helm
     release: rancher
 spec:
@@ -74,7 +88,7 @@ metadata:
   annotations:
   labels:
     app: rancher
-    chart: rancher-2.7.9
+    chart: rancher-2.8.2
     heritage: Helm
     release: rancher
 spec:
@@ -121,7 +135,7 @@ spec:
           effect: "NoSchedule"
           operator: "Equal"
       containers:
-      - image: rancher/rancher:v2.7.9
+      - image: rancher/rancher:v2.8.2
         imagePullPolicy: IfNotPresent
         name: rancher
         ports:
@@ -167,7 +181,7 @@ metadata:
   name: rancher
   labels:
     app: rancher
-    chart: rancher-2.7.9
+    chart: rancher-2.8.2
     heritage: Helm
     release: rancher
   annotations:
@@ -200,7 +214,7 @@ metadata:
   name: rancher
   labels:
     app: rancher
-    chart: rancher-2.7.9
+    chart: rancher-2.8.2
     heritage: Helm
     release: rancher
 spec:
@@ -214,20 +228,6 @@ spec:
         ingress:
           class: traefik
 ---
-# Source: rancher/templates/priorityClass.yaml
-apiVersion: scheduling.k8s.io/v1
-kind: PriorityClass
-metadata:
-  name: rancher-critical
-  labels: 
-    app: rancher
-    chart: rancher-2.7.9
-    heritage: Helm
-    release: rancher
-value: 1000000000
-globalDefault: false
-description: "Priority class used by pods critical to rancher's functionality."
----
 # Source: rancher/templates/post-delete-hook-service-account.yaml
 apiVersion: v1
 kind: ServiceAccount
@@ -236,7 +236,7 @@ metadata:
   namespace: cattle-system
   labels: 
     app: rancher
-    chart: rancher-2.7.9
+    chart: rancher-2.8.2
     heritage: Helm
     release: rancher
   annotations:
@@ -266,7 +266,7 @@ metadata:
   namespace: cattle-system
   labels: 
     app: rancher
-    chart: rancher-2.7.9
+    chart: rancher-2.8.2
     heritage: Helm
     release: rancher
   annotations:
@@ -377,7 +377,7 @@ metadata:
   name: rancher-post-delete
   labels: 
     app: rancher
-    chart: rancher-2.7.9
+    chart: rancher-2.8.2
     heritage: Helm
     release: rancher
   annotations:
@@ -423,7 +423,7 @@ metadata:
   name: rancher-post-delete
   labels: 
     app: rancher
-    chart: rancher-2.7.9
+    chart: rancher-2.8.2
     heritage: Helm
     release: rancher
   annotations:
@@ -447,7 +447,7 @@ metadata:
   namespace: cattle-system
   labels: 
     app: rancher
-    chart: rancher-2.7.9
+    chart: rancher-2.8.2
     heritage: Helm
     release: rancher
   annotations:
@@ -461,7 +461,7 @@ spec:
       name: rancher-post-delete
       labels: 
         app: rancher
-        chart: rancher-2.7.9
+        chart: rancher-2.8.2
         heritage: Helm
         release: rancher
     spec:
@@ -469,7 +469,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: rancher-post-delete
-          image: "rancher/shell:v0.1.21"
+          image: "rancher/shell:v0.1.22"
           imagePullPolicy: IfNotPresent
           securityContext:
             runAsUser: 0
