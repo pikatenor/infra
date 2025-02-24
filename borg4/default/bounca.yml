@@ -1,0 +1,192 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    workload.user.cattle.io/workloadselector: deployment-default-bounca
+  name: bounca
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: deployment-default-bounca
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        workload.user.cattle.io/workloadselector: deployment-default-bounca
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 1001
+      containers:
+        - name: bounca
+          image: "mirror.gcr.io/aluveitie/bounca:latest"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: BOUNCA_FQDN
+              value: "pki.tkyo.d.p1kachu.net"
+            - name: POSTGRES_HOST
+              value: "localhost"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: bounca
+                  key: db-password
+          securityContext:
+            runAsUser: 101
+            runAsGroup: 101
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            privileged: false
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            limits:
+              cpu: 400m
+              memory: 384Mi
+            requests:
+              cpu: 50m
+              memory: 128Mi
+          ports:
+            - containerPort: 8080
+              name: web
+              protocol: TCP
+          startupProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /
+              port: web
+              scheme: HTTP
+            periodSeconds: 15
+            timeoutSeconds: 3
+          readinessProbe:
+            failureThreshold: 2
+            httpGet:
+              path: /
+              port: web
+            periodSeconds: 15
+            timeoutSeconds: 3
+          volumeMounts:
+            - name: etc
+              mountPath: /etc/bounca
+        - name: postgres
+          image: "mirror.gcr.io/bitnami/postgresql:16-debian-12"
+          env:
+            - name: BITNAMI_DEBUG
+              value: "false"
+            - name: POSTGRESQL_VOLUME_DIR
+              value: "/var/lib/postgresql"
+            - name: PGDATA
+              value: "/var/lib/postgresql/data"
+            - name: POSTGRESQL_ENABLE_LDAP
+              value: "no"
+            - name: POSTGRES_USER
+              value: "bounca"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: bounca
+                  key: db-password
+            - name: POSTGRESQL_DATABASE
+              value: "bounca"
+          securityContext:
+            runAsUser: 1001
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            privileged: false
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 10m
+              memory: 32Mi
+          ports:
+            - containerPort: 5432
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - >
+                    until pg_isready -U "$POSTGRES_USER" -h 127.0.0.1 -p 5432; do
+                      echo "Waiting for Postgres to be ready...";
+                      sleep 1;
+                    done;
+                    echo "Postgres is up and running.";
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - exec pg_isready -U "$POSTGRES_USER" -h 127.0.0.1 -p 5432
+            failureThreshold: 6
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - -e
+                - |
+                  exec pg_isready -U "$POSTGRES_USER" -h 127.0.0.1 -p 5432
+                  [ -f /opt/bitnami/postgresql/tmp/.initialized ] || [ -f /var/lib/postgresql/.initialized ]
+            failureThreshold: 6
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: dshm
+              mountPath: /dev/shm
+            - name: vrun
+              mountPath: /var/run/postgresql
+            - name: tmp
+              mountPath: /tmp
+            - name: bounca-storage
+              mountPath: /var/lib/postgresql
+      volumes:
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 256Mi
+        - name: vrun
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+        - name: etc
+          emptyDir: {}
+        - name: bounca-storage
+          hostPath:
+            path: /media/Hayate/bounca-psql
+            type: Directory
+      nodeName: juno4a
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bounca
+  namespace: default
+spec:
+  ports:
+  - name: http8000
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    workload.user.cattle.io/workloadselector: deployment-default-bounca
+  sessionAffinity: None
+  type: LoadBalancer
