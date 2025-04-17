@@ -6,7 +6,7 @@ metadata:
   name: rancher-critical
   labels: 
     app: rancher
-    chart: rancher-2.8.5
+    chart: rancher-2.9.3
     heritage: Helm
     release: rancher
 value: 1000000000
@@ -20,7 +20,7 @@ metadata:
   name: rancher
   labels:
     app: rancher
-    chart: rancher-2.8.5
+    chart: rancher-2.9.3
     heritage: Helm
     release: rancher
 ---
@@ -31,7 +31,7 @@ metadata:
   name: rancher-config
   labels: 
     app: rancher
-    chart: rancher-2.8.5
+    chart: rancher-2.9.3
     heritage: Helm
     release: rancher
     app.kubernetes.io/part-of: "rancher"
@@ -45,7 +45,7 @@ metadata:
   name: rancher
   labels:
     app: rancher
-    chart: rancher-2.8.5
+    chart: rancher-2.9.3
     heritage: Helm
     release: rancher
 subjects:
@@ -64,7 +64,7 @@ metadata:
   name: rancher
   labels:
     app: rancher
-    chart: rancher-2.8.5
+    chart: rancher-2.9.3
     heritage: Helm
     release: rancher
 spec:
@@ -88,7 +88,7 @@ metadata:
   annotations:
   labels:
     app: rancher
-    chart: rancher-2.8.5
+    chart: rancher-2.9.3
     heritage: Helm
     release: rancher
 spec:
@@ -135,7 +135,7 @@ spec:
           effect: "NoSchedule"
           operator: "Equal"
       containers:
-      - image: rancher/rancher:v2.8.5
+      - image: rancher/rancher:v2.9.3
         imagePullPolicy: IfNotPresent
         name: rancher
         ports:
@@ -157,18 +157,27 @@ spec:
             secretKeyRef:
               name: "bootstrap-secret"
               key: "bootstrapPassword"
+        startupProbe:
+          httpGet:
+            path: /healthz
+            port: 80
+          timeoutSeconds: 5
+          failureThreshold: 12
+          periodSeconds: 10
         livenessProbe:
           httpGet:
             path: /healthz
             port: 80
-          initialDelaySeconds: 60
+          timeoutSeconds: 5
           periodSeconds: 30
+          failureThreshold: 5
         readinessProbe:
           httpGet:
             path: /healthz
             port: 80
-          initialDelaySeconds: 5
+          timeoutSeconds: 5
           periodSeconds: 30
+          failureThreshold: 5
         resources:
           {}
         volumeMounts:
@@ -181,7 +190,7 @@ metadata:
   name: rancher
   labels:
     app: rancher
-    chart: rancher-2.8.5
+    chart: rancher-2.9.3
     heritage: Helm
     release: rancher
   annotations:
@@ -214,7 +223,7 @@ metadata:
   name: rancher
   labels:
     app: rancher
-    chart: rancher-2.8.5
+    chart: rancher-2.9.3
     heritage: Helm
     release: rancher
 spec:
