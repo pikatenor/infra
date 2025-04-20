@@ -330,7 +330,7 @@ resource "oci_containerengine_cluster" "oke25" {
 resource "oci_containerengine_node_pool" "oke25-node-pool" {
   cluster_id         = oci_containerengine_cluster.oke25.id
   compartment_id     = local.root_compartment_id
-  kubernetes_version = "v1.28.10"
+  kubernetes_version = "v1.30.10"
 
   name = "yuzu-pool1"
 
@@ -351,8 +351,8 @@ resource "oci_containerengine_node_pool" "oke25-node-pool" {
     ocpus         = 2
   }
   node_source_details {
-    # Oracle-Linux-8.10-aarch64-2024.09.30-0-OKE-1.28.10-747
-    image_id    = "ocid1.image.oc1.ap-tokyo-1.aaaaaaaarofq2ifir76tf6yzx3ulmclv6qhkn5angpgnrooxa3u4pyl34sxq"
+    # Oracle-Linux-8.10-aarch64-2025.02.28-0-OKE-1.30.1-760
+    image_id    = "ocid1.image.oc1.ap-tokyo-1.aaaaaaaanm2cylmlqitajo6wuymhbg7ppoheclrow7nloibqmnm2dyfvmsya"
     source_type = "image"
   }
 
