@@ -9,4 +9,4 @@ priorityClass:
   value: 1000000
 
 nodeSelector:
-  kubernetes.io/hostname: seira
+  kubernetes.io/hostname: nono

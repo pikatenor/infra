@@ -244,7 +244,7 @@ spec:
             - name: data
               mountPath: /export
       nodeSelector:
-        kubernetes.io/hostname: seira
+        kubernetes.io/hostname: nono
       priorityClassName: "nfs-provisioner-nfs-server-provisioner"
       volumes:
         - name: data
