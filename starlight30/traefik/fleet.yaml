@@ -1,1 +1,31 @@
 defaultNamespace: traefik
+
+helm:
+  repo: https://traefik.github.io/charts
+  chart: traefik
+  version: 35.0.1
+  values:
+    deployment:
+      kind: DaemonSet
+    service:
+      type: NodePort
+    ports:
+      web:
+        nodePort: 80
+      websecure:
+        nodePort: 443
+    ingressRoute:
+      dashboard:
+        enabled: true
+    tlsStore:
+      default:
+        defaultCertificate:
+          secretName: wild-cert
+
+dependsOn:
+  - selector:
+      matchLabels:
+        app: traefik-crds
+  - selector:
+      matchLabels:
+        app: cert-manager
