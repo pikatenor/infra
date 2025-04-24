@@ -1,5 +1,8 @@
 defaultNamespace: cert-manager
 
+labels:
+  app: cert-manager
+
 helm:
   repo: https://charts.jetstack.io
   chart: cert-manager
