@@ -64,7 +64,20 @@ spec:
                   number: 80
             path: /
             pathType: Prefix 
+    - host: p.0px.org
+      http:
+        paths:
+          - backend:
+              service:
+                name: piping
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix 
   tls:
     - hosts:
         - piping.app.p1kachu.net
       secretName: wild-cert
+    - hosts:
+        - p.0px.org
+      secretName: zeropixel-cert
