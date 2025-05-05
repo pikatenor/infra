@@ -35,7 +35,6 @@ spec:
           timeoutSeconds: 2
         resources: {}
       imagePullSecrets:
-      - name: p1kachu
       - name: c.p1kachu.net
 
 ---
