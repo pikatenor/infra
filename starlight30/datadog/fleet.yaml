@@ -6,6 +6,7 @@ helm:
   version: v3.58.1
   values: 
     registry: public.ecr.aws/datadog
+    fullnameOverride: dd
     datadog:
       logLevel: WARN
       apiKeyExistingSecret: datadog-secret
