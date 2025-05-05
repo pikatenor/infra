@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: saas
-        image: registry.p1kachu.net:5000/saas
+        image: c.p1kachu.net/saas
         imagePullPolicy: Always
         ports:
         - containerPort: 80
@@ -35,7 +35,7 @@ spec:
           timeoutSeconds: 2
         resources: {}
       imagePullSecrets:
-      - name: p1kachu
+      - name: c.p1kachu.net
 
 ---
 apiVersion: v1
