@@ -15,5 +15,12 @@ helm:
       processAgent:
         enabled: true
         processCollection: true
+      otlp:
+        receiver:
+          protocols:
+            grpc:
+              enabled: true
+            http:
+              enabled: true
     kubeStateMetricsEnabled: true
  
