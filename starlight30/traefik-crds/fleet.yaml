@@ -4,4 +4,4 @@ labels:
 helm:
   repo: https://traefik.github.io/charts
   chart: traefik-crds
-  version: 1.7.0
+  version: 1.8.1
