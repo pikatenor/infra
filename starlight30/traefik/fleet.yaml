@@ -3,7 +3,7 @@ defaultNamespace: traefik
 helm:
   repo: https://traefik.github.io/charts
   chart: traefik
-  version: 35.2.0
+  version: 35.4.0
   values:
     deployment:
       kind: DaemonSet
