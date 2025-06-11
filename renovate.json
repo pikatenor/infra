@@ -2,5 +2,16 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended"
-  ]
+  ],
+  "kubernetes": {
+    "fileMatch": [
+      "^borg4/.+\\.ya?ml$",
+      "^starlight30/.+\\.ya?ml$",
+      "^yuzu/.+\\.ya?ml$"
+    ],
+    "ignorePaths": [
+      ".*fleet\\.yaml$",
+      "yuzu/cattle-system/"
+    ]
+  }
 }
