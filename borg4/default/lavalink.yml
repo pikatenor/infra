@@ -9,10 +9,12 @@ data:
       port: 8080
       address: 0.0.0.0
     lavalink:
+      plugins:
+      - dependency: "dev.lavalink.youtube:youtube-plugin:1.13.3"
       server:
         password: "crumpet-stuffy-encourage"
         sources:
-          youtube: true
+          youtube: false # disable built-in youtube source to use the plugin instead
           bandcamp: true
           soundcloud: true
           twitch: true
@@ -31,6 +33,17 @@ data:
           #strategy: "RotateOnBan" # RotateOnBan | LoadBalance | NanoSwitch | RotatingNanoSwitch
           #searchTriggersFail: true # Whether a search 429 should trigger marking the ip as failing
           #retryLimit: -1 # -1 = use default lavaplayer value | 0 = infinity | >0 = retry will happen this numbers times
+
+    plugins:
+      youtube:
+        enabled: true
+        allowSearch: true
+        allowDirectVideoIds: true
+        allowDirectPlaylistIds: true
+        clients:
+          - MUSIC
+          - WEBEMBEDDED
+          - WEB
 
     metrics:
       prometheus:
@@ -67,7 +80,7 @@ spec:
         workload.user.cattle.io/workloadselector: deployment-default-lavalink
     spec:
       containers:
-      - image: fredboat/lavalink:dev-v7ab68938bb85e09e38cbccc0d5e133276969686e-SNAPSHOT
+      - image: fredboat/lavalink:4-distroless
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 2

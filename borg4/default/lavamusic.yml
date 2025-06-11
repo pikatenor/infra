@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    workload.user.cattle.io/workloadselector: deployment-default-lavamusic
+  name: lavamusic
+  namespace: default
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: deployment-default-lavamusic
+  strategy:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        workload.user.cattle.io/workloadselector: deployment-default-lavamusic
+    spec:
+      initContainers:
+      - name: permission
+        image: busybox
+        command: ["sh", "-c", "chown -R 1000:1000 /db"]
+        volumeMounts:
+        - name: db
+          mountPath: /db
+      containers:
+      - image: ghcr.io/appujet/lavamusic@sha256:26ffc7d492f992b75dfbc2d4a1268d6b66e9e2099ce5abd5c8469773b5c527e9
+        imagePullPolicy: Always
+        command:
+          - sh
+          - -c
+          - |
+            set -ex
+            touch /db/lavamusic.db
+            ln -s /db/lavamusic.db /opt/lavamusic/prisma/lavamusic.db
+            npx prisma generate
+            npx prisma db push
+            exec node /opt/lavamusic/dist/index.js
+        env:
+        - name: NODES
+          value: >-
+                [{"id":"main","host":"lavalink.default","port":8080,"authorization":"crumpet-stuffy-encourage"}]
+        - name: OWNER_IDS
+          value: "[\"455614659324542976\"]"
+        - name: CLIENT_ID
+          value: ""
+        - name: TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: TOKEN
+              name: orpheus-token
+        name: lavamusic
+        resources: {}
+        securityContext:
+          runAsNonRoot: false
+          readOnlyRootFilesystem: false
+          privileged: false
+          allowPrivilegeEscalation: false
+        volumeMounts:
+        - name: db
+          mountPath: /db
+        #- name: locales
+        #  mountPath: /opt/lavamusic/locales
+      volumes:
+        - name: db
+          persistentVolumeClaim:
+            claimName: lavamusic-data
+        - name: locales
+          emptyDir: {}
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: lavamusic-data
+  namespace: default
+spec:
+  resources:
+    requests:
+      storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ''
+  volumeName: lavamusic-data
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: lavamusic-data
+spec:
+  persistentVolumeReclaimPolicy: Retain
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /media/local/lavamusic-data
+    type: DirectoryOrCreate
