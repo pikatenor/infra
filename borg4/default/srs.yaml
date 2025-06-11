@@ -51,7 +51,7 @@ spec:
           name: srs-config
       containers:
       - name: srs
-        image: ossrs/srs:4@sha256:6ae6e030b00ea4746e26f76a1ad0bbdf36192b002f67fd52106fba70cfcb6e16
+        image: ossrs/srs:v6@sha256:c4718e2c63ea1ae58127e70e14730d9f24f8898d76e5f3f90f050fe658154728
         ports:
         - containerPort: 1935
         - containerPort: 1985
