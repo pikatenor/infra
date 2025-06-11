@@ -22,7 +22,7 @@ spec:
         fsGroup: 1001
       containers:
         - name: bounca
-          image: "mirror.gcr.io/aluveitie/bounca:latest"
+          image: "mirror.gcr.io/aluveitie/bounca:latest@sha256:b6afb6fb8aab07da862b2e15105eb79c230a71b7dcb638fff720d1b226e5ef1f"
           imagePullPolicy: IfNotPresent
           env:
             - name: BOUNCA_FQDN
@@ -74,7 +74,7 @@ spec:
             - name: etc
               mountPath: /etc/bounca
         - name: postgres
-          image: "mirror.gcr.io/bitnami/postgresql:16-debian-12"
+          image: "mirror.gcr.io/bitnami/postgresql:16-debian-12@sha256:233f361c5819c180b600d110d7da953bea6f1a00764752643ffb7b78ba85c628"
           env:
             - name: BITNAMI_DEBUG
               value: "false"

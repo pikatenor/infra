@@ -18,7 +18,7 @@ spec:
       - env:
         - name: MODE
           value: standalone
-        image: adolfintel/speedtest
+        image: adolfintel/speedtest@sha256:1f828fe8337470d2ed5841176bfa6633fd94bda97261a636c35d0bef60a35270
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 3
