@@ -23,7 +23,7 @@ spec:
     spec:
       initContainers:
       - name: permission
-        image: busybox
+        image: busybox@sha256:f85340bf132ae937d2c2a763b8335c9bab35d6e8293f70f606b9c6178d84f42b
         command: ["sh", "-c", "chown -R 1000:1000 /db"]
         volumeMounts:
         - name: db

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: darkhttpd
-          image: nrt.ocir.io/nrdcprlzxgzg/public/yuzu-test
+          image: nrt.ocir.io/nrdcprlzxgzg/public/yuzu-test@sha256:1ee77fa8e32a6d424a4b0720eb4c8ecb112942011f73427283dbd20d0bf3ac78
           ports:
             - name: web
               containerPort: 80

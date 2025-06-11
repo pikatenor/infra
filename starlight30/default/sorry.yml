@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
       - name: sorry
-        image: nrt.ocir.io/nrdcprlzxgzg/public/sorry
+        image: nrt.ocir.io/nrdcprlzxgzg/public/sorry@sha256:a10105409a928de933529d5e86cf606ccf627409c8f63a8e3f1d129fc4175803
         imagePullPolicy: Always
         ports:
         - containerPort: 80
