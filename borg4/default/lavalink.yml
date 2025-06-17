@@ -80,7 +80,7 @@ spec:
         workload.user.cattle.io/workloadselector: deployment-default-lavalink
     spec:
       containers:
-      - image: fredboat/lavalink:4-distroless@sha256:74c51d39e2ace03164e6e59cbacbeccfc3d6737350402757304dcb8e80c58f1b
+      - image: fredboat/lavalink:9503262-distroless@sha256:b614f6e68a18295948bb239c51782bc90f0ee6eb1db1a05bf6be7bab9c0498e2
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 2
