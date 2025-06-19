@@ -22,5 +22,6 @@ helm:
               enabled: true
             http:
               enabled: true
+      clusterName: starlight30
     kubeStateMetricsEnabled: true
  
