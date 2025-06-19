@@ -1,0 +1,27 @@
+defaultNamespace: forgejo
+
+helm:
+  chart: oci://code.forgejo.org/forgejo-helm/forgejo
+  version: 12.5.1
+  values:
+    replicaCount: 1
+
+    persistence:
+      enabled: true
+      create: false
+      claimName: forgejo-pvc
+    redis-cluster:
+      enabled: false
+    redis:
+      enabled: true
+    postgresql:
+      enabled: false
+    postgresql-ha:
+      enabled: false
+
+    gitea:
+      config:
+        database:
+          DB_TYPE: sqlite3
+      admin:
+        passwordMode: initialOnlyRequireReset
