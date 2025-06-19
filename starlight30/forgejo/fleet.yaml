@@ -28,6 +28,7 @@ helm:
           SSH_DOMAIN:  git.p1kachu.net
           SSH_PORT: 20022 # displayed in the clone URL
           SSH_LISTEN_PORT: 22
+        service:
           DISABLE_REGISTRATION: true
       admin:
         username: pikatenor
