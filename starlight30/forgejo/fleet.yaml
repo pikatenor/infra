@@ -23,5 +23,30 @@ helm:
       config:
         database:
           DB_TYPE: sqlite3
+        server:
+          ROOT_URL: https://git.p1kachu.net
+          SSH_DOMAIN:  git.p1kachu.net
+          DISABLE_REGISTRATION: true
       admin:
         passwordMode: initialOnlyRequireReset
+
+    service:
+      ssh:
+        type: NodePort
+        nodePort: 20022
+    ingress:
+      enabled: true
+      annotations:
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        traefik.ingress.kubernetes.io/router.tls: "true"
+        traefik.ingress.kubernetes.io/router.tls.certresolver: default
+      hosts:
+        - host: git.p1kachu.net
+          paths:
+            - path: /
+              port: http
+              pathType: Prefix
+      tls:
+        - secretName: wild-cert
+          hosts:
+            - git.p1kachu.net
