@@ -1,0 +1,17 @@
+defaultNamespace: woodpecker
+
+helm:
+  chart: oci://ghcr.io/woodpecker-ci/helm/woodpecker
+  version: 3.2.0
+
+  values: 
+    agent:
+      env:
+        WOODPECKER_SERVER: starlight30-starlight30-woodpecker-server:9000
+
+    server:
+      env:
+        WOODPECKER_FORGEJO: true
+        WOODPECKER_FORGEJO_URL: http://starlight30-starlight30-forgejo-http:3000
+      extraSecretNamesForEnvFrom: 
+        - forgejo-client-secret
