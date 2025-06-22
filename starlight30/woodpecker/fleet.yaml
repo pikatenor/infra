@@ -15,6 +15,7 @@ helm:
         WOODPECKER_HOST: https://woodpecker-ci.app.p1kachu.net
         WOODPECKER_FORGEJO: true
         WOODPECKER_FORGEJO_URL: http://starlight30-starlight30-forgejo-http.forgejo.svc.cluster.local:3000
+        WOODPECKER_OPEN: true
       extraSecretNamesForEnvFrom: 
         - forgejo-client-secret
 
