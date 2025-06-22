@@ -6,6 +6,7 @@ helm:
 
   values: 
     agent:
+      replicaCount: 1
       env:
         WOODPECKER_SERVER: starlight30-starlight30-woodpecker-server:9000
 
