@@ -16,3 +16,20 @@ helm:
         WOODPECKER_FORGEJO_URL: http://starlight30-starlight30-forgejo-http:3000
       extraSecretNamesForEnvFrom: 
         - forgejo-client-secret
+
+      ingress:
+        enabled: true
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+          traefik.ingress.kubernetes.io/router.tls: "true"
+          traefik.ingress.kubernetes.io/router.tls.certresolver: default
+        hosts:
+          - host: woodpecker-ci.app.p1kachu.net
+            paths:
+              - path: /
+                port: http
+                pathType: Prefix
+        tls:
+          - secretName: wild-cert
+            hosts:
+              - woodpecker-ci.app.p1kachu.net
