@@ -25,7 +25,7 @@ spec:
     spec:
       containers:
       - name: registry
-        image: registry:2@sha256:a3d8aaa63ed8681a604f1dea0aa03f100d5895b6a58ace528858a7b332415373
+        image: registry:3@sha256:3725021071ec9383eb3d87ddbdff9ed602439b3f7c958c9c2fb941049ea6531d
         imagePullPolicy: Always
         env:
         - name: REGISTRY_HTTP_DEBUG_ADDR
