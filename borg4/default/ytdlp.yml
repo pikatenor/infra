@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    workload.user.cattle.io/workloadselector: apps.deployment-default-ytdlp
+  name: ytdlp
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: apps.deployment-default-ytdlp
+  template:
+    metadata:
+      labels:
+        workload.user.cattle.io/workloadselector: apps.deployment-default-ytdlp
+      namespace: default
+    spec:
+      containers:
+        - image: c.p1kachu.net/ytdlp
+          imagePullPolicy: Always
+          name: ytdlp
+          ports:
+            - containerPort: 8000
+              name: 8000tcp80
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 8000
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 2
+            successThreshold: 1
+            timeoutSeconds: 2
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 8000
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 2
+            successThreshold: 2
+            timeoutSeconds: 2
+          resources: {}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: {}
+            privileged: false
+            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+            runAsUser: 1000
+          volumeMounts:
+            - mountPath: /app/downloads
+              name: downloads
+      nodeName: juno4a
+      imagePullSecrets:
+        - name: c.p1kachu.net
+      restartPolicy: Always
+      volumes:
+        - hostPath:
+            path: /media/Hayate/Videos/ytdlp-downloads
+            type: DirectoryOrCreate
+          name: downloads
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ytdlp
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8000tcp80
+  selector:
+    workload.user.cattle.io/workloadselector: apps.deployment-default-ytdlp
+  type: LoadBalancer
