@@ -1,0 +1,26 @@
+defaultNamespace: heimdall
+
+helm:
+  repo: https://dadrus.github.io/heimdall/charts
+  version: 0.15.6
+  chart: heimdall
+  releaseName: heimdall
+  values:
+    log:
+      level: info
+    mechanisms:
+      authenticators:
+      - id: anonymous_authenticator
+        type: anonymous
+      finalizers:
+      - id: noop
+        type: noop
+    default_rule:
+      execute:
+        - authenticator: anonymous_authenticator
+        - finalizer: noop
+    extraArgs:
+      - --insecure
+    providers:
+      kubernetes: {}
+      
