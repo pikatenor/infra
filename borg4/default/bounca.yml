@@ -74,7 +74,7 @@ spec:
             - name: etc
               mountPath: /etc/bounca
         - name: postgres
-          image: "mirror.gcr.io/bitnami/postgresql:16-debian-12@sha256:233f361c5819c180b600d110d7da953bea6f1a00764752643ffb7b78ba85c628"
+          image: "mirror.gcr.io/bitnami/postgresql:17-debian-12@sha256:926356130b77d5742d8ce605b258d35db9b62f2f8fd1601f9dbaef0c8a710a8d"
           env:
             - name: BITNAMI_DEBUG
               value: "false"
