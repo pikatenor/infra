@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: redis
-        image: redis:alpine@sha256:48501c5ad00d5563bc30c075c7bcef41d7d98de3e9a1e6c752068c66f0a8463b
+        image: redis:alpine@sha256:987c376c727652f99625c7d205a1cba3cb2c53b92b0b62aade2bd48ee1593232
         ports:
         - containerPort: 6379
           name: redis
