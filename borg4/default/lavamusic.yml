@@ -29,7 +29,7 @@ spec:
         - name: db
           mountPath: /db
       containers:
-      - image: ghcr.io/appujet/lavamusic@sha256:26ffc7d492f992b75dfbc2d4a1268d6b66e9e2099ce5abd5c8469773b5c527e9
+      - image: ghcr.io/c0ders-io/c0ders-io/lavamusic:prod@sha256:df03acf1b92687037476365dd3ffb901218d94cf986884f127cee5561455f5df
         imagePullPolicy: Always
         command:
           - sh
