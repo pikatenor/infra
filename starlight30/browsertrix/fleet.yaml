@@ -4,7 +4,7 @@ helm:
   repo: https://docs.browsertrix.com/helm-repo/
   releaseName: browsertrix
   chart: browsertrix
-  version: 1.17.4
+  version: 1.19.2
   values: 
     ingress_class: traefik
     ingress:
