@@ -6,7 +6,7 @@ metadata:
   name: rancher-critical
   labels: 
     app: rancher
-    chart: rancher-2.10.3
+    chart: rancher-2.11.3
     heritage: Helm
     release: rancher
 value: 1000000000
@@ -20,7 +20,7 @@ metadata:
   name: rancher
   labels:
     app: rancher
-    chart: rancher-2.10.3
+    chart: rancher-2.11.3
     heritage: Helm
     release: rancher
 ---
@@ -31,7 +31,7 @@ metadata:
   name: rancher-config
   labels: 
     app: rancher
-    chart: rancher-2.10.3
+    chart: rancher-2.11.3
     heritage: Helm
     release: rancher
     app.kubernetes.io/part-of: "rancher"
@@ -45,7 +45,7 @@ metadata:
   name: rancher
   labels:
     app: rancher
-    chart: rancher-2.10.3
+    chart: rancher-2.11.3
     heritage: Helm
     release: rancher
 subjects:
@@ -64,7 +64,7 @@ metadata:
   name: rancher
   labels:
     app: rancher
-    chart: rancher-2.10.3
+    chart: rancher-2.11.3
     heritage: Helm
     release: rancher
 spec:
@@ -88,7 +88,7 @@ metadata:
   annotations:
   labels:
     app: rancher
-    chart: rancher-2.10.3
+    chart: rancher-2.11.3
     heritage: Helm
     release: rancher
 spec:
@@ -123,8 +123,8 @@ spec:
               topologyKey: kubernetes.io/hostname
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms: 
-              - matchExpressions:
+            nodeSelectorTerms:
+              - matchExpressions: 
                 - key: kubernetes.io/os
                   operator: NotIn
                   values:
@@ -135,11 +135,13 @@ spec:
           effect: "NoSchedule"
           operator: "Equal"
       containers:
-      - image: rancher/rancher:v2.10.3
+      - image: rancher/rancher:v2.11.3
         imagePullPolicy: IfNotPresent
         name: rancher
         ports:
         - containerPort: 80
+          protocol: TCP
+        - containerPort: 6666
           protocol: TCP
         args:
         # Public trusted CA - clear ca certs
@@ -157,6 +159,10 @@ spec:
             secretKeyRef:
               name: "bootstrap-secret"
               key: "bootstrapPassword"
+        - name: IMPERATIVE_API_DIRECT
+          value: "true"
+        - name: IMPERATIVE_API_APP_SELECTOR
+          value: rancher
         startupProbe:
           httpGet:
             path: /healthz
@@ -178,8 +184,6 @@ spec:
           timeoutSeconds: 5
           periodSeconds: 30
           failureThreshold: 5
-        resources:
-          {}
         volumeMounts:
       volumes:
 ---
@@ -190,7 +194,7 @@ metadata:
   name: rancher
   labels:
     app: rancher
-    chart: rancher-2.10.3
+    chart: rancher-2.11.3
     heritage: Helm
     release: rancher
   annotations:
@@ -223,7 +227,7 @@ metadata:
   name: rancher
   labels:
     app: rancher
-    chart: rancher-2.10.3
+    chart: rancher-2.11.3
     heritage: Helm
     release: rancher
 spec:
