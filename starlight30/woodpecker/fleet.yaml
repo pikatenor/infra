@@ -2,7 +2,7 @@ defaultNamespace: woodpecker
 
 helm:
   chart: oci://ghcr.io/woodpecker-ci/helm/woodpecker
-  version: 3.2.0
+  version: 3.3.1
 
   values: 
     agent:
