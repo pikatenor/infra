@@ -304,7 +304,7 @@ resource "oci_core_security_list" "oke-api-security-list" {
 
 resource "oci_containerengine_cluster" "oke25" {
   compartment_id     = local.root_compartment_id
-  kubernetes_version = "v1.30.10"
+  kubernetes_version = "v1.31.10"
   name               = "yuzu"
   vcn_id             = module.vcn.vcn_id
 
@@ -330,7 +330,7 @@ resource "oci_containerengine_cluster" "oke25" {
 resource "oci_containerengine_node_pool" "oke25-node-pool" {
   cluster_id         = oci_containerengine_cluster.oke25.id
   compartment_id     = local.root_compartment_id
-  kubernetes_version = "v1.30.10"
+  kubernetes_version = "v1.31.10"
 
   name = "yuzu-pool1"
 
@@ -351,8 +351,8 @@ resource "oci_containerengine_node_pool" "oke25-node-pool" {
     ocpus         = 2
   }
   node_source_details {
-    # Oracle-Linux-8.10-aarch64-2025.02.28-0-OKE-1.30.1-760
-    image_id    = "ocid1.image.oc1.ap-tokyo-1.aaaaaaaanm2cylmlqitajo6wuymhbg7ppoheclrow7nloibqmnm2dyfvmsya"
+    # Oracle-Linux-8.10-aarch64-2025.07.21-0-OKE-1.31.10-967
+    image_id    = "ocid1.image.oc1.ap-tokyo-1.aaaaaaaaququeohbnprma7iufujqd55ra6yyj5feeic2b6shje5kbkkuz5qa"
     source_type = "image"
   }
 
