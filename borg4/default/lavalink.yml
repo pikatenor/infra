@@ -10,7 +10,7 @@ data:
       address: 0.0.0.0
     lavalink:
       plugins:
-      - dependency: "dev.lavalink.youtube:youtube-plugin:1.13.3"
+      - dependency: "dev.lavalink.youtube:youtube-plugin:1.14.0"
       server:
         password: "crumpet-stuffy-encourage"
         sources:
