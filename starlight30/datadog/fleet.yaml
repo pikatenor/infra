@@ -3,7 +3,7 @@ defaultNamespace: datadog
 helm:
   repo: https://helm.datadoghq.com
   chart: datadog
-  version: 3.135.4
+  version: 3.149.0
   values: 
     registry: public.ecr.aws/datadog
     fullnameOverride: dd
