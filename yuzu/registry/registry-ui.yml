@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: registry-ui
-        image: joxit/docker-registry-ui:main@sha256:91f657f47aabcc8a497cd5ee4046b85a2c21ea7f2ff1d7dda9ce835b91bc15e8
+        image: joxit/docker-registry-ui:main@sha256:9d5f23d35f765af3d2071b3d1b772d6a5620ba510ae02e721d5011b90f13f36e
         imagePullPolicy: Always
         env:
         - name: SINGLE_REGISTRY
