@@ -10,14 +10,6 @@ helm:
       enabled: true
       create: false
       claimName: forgejo-pvc
-    redis-cluster:
-      enabled: false
-    redis:
-      enabled: true
-    postgresql:
-      enabled: false
-    postgresql-ha:
-      enabled: false
 
     gitea:
       config:
