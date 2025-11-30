@@ -2,7 +2,7 @@ defaultNamespace: forgejo
 
 helm:
   chart: oci://code.forgejo.org/forgejo-helm/forgejo
-  version: 12.5.4
+  version: 14.0.4
   values:
     replicaCount: 1
 
