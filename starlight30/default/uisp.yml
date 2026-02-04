@@ -1,0 +1,88 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    workload.user.cattle.io/workloadselector: apps.deployment-default-uisp
+  name: uisp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: apps.deployment-default-uisp
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        workload.user.cattle.io/workloadselector: apps.deployment-default-uisp
+      namespace: default
+    spec:
+      containers:
+        - image: nico640/docker-unms
+          imagePullPolicy: Always
+          name: uisp
+          ports:
+            - containerPort: 443
+              name: https
+              protocol: TCP
+            - containerPort: 2055
+              name: netflow
+              protocol: UDP
+          resources: {}
+          volumeMounts:
+            - mountPath: /config
+              name: config
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: uisp-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: uisp
+  annotations:
+    traefik.ingress.kubernetes.io/service.serversscheme: https
+    traefik.ingress.kubernetes.io/service.serverstransport: traefik-insecure-transport@kubernetescrd
+spec:
+  ports:
+    - name: https
+      port: 443
+      protocol: TCP
+      targetPort: 443
+    - name: netflow
+      port: 2055
+      protocol: UDP
+      targetPort: 2055
+  selector:
+    workload.user.cattle.io/workloadselector: apps.deployment-default-uisp
+  type: ClusterIP
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: uisp
+  namespace: default
+spec:
+  rules:
+    - host: uisp.p1kachu.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                port:
+                  number: 443
+                name: uisp
+  tls:
+    - hosts:
+        - uisp.p1kachu.net
