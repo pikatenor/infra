@@ -28,6 +28,9 @@ helm:
           enabled: true
           insecure: true
           endpoint: "dd.datadog.svc.cluster.local:4317"
+    providers:
+      kubernetesCRD:
+        allowCrossNamespace: true
 
 dependsOn:
   - selector:
