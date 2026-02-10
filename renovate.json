@@ -6,6 +6,15 @@
   ],
   "packageRules": [
     {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": [
+        "mirror.gcr.io/bitnami/postgresql",
+        "c.p1kachu.net/*",
+        "registry.p1kachu.net:5000/*"
+      ],
+      "enabled": false
+    },
+    {
       "matchUpdateTypes": ["patch", "pin", "digest"],
       "automerge": true
     }
