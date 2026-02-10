@@ -74,17 +74,25 @@ spec:
             - name: etc
               mountPath: /etc/bounca
         - name: postgres
-          image: postgres:16-alpine@sha256:4327b9fd295502f326f44153a1045a7170ddbfffed1c3829798328556cfd09e2
+          image: "mirror.gcr.io/bitnami/postgresql:16-debian-12@sha256:233f361c5819c180b600d110d7da953bea6f1a00764752643ffb7b78ba85c628"
           env:
+            - name: BITNAMI_DEBUG
+              value: "false"
+            - name: POSTGRESQL_VOLUME_DIR
+              value: "/var/lib/postgresql"
+            - name: PGDATA
+              value: "/var/lib/postgresql/data"
+            - name: POSTGRESQL_ENABLE_LDAP
+              value: "no"
             - name: POSTGRES_USER
-              value: bounca
+              value: "bounca"
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: bounca
                   key: db-password
-            - name: POSTGRES_DB
-              value: bounca
+            - name: POSTGRESQL_DATABASE
+              value: "bounca"
           securityContext:
             runAsUser: 1001
             runAsNonRoot: true
@@ -134,6 +142,7 @@ spec:
                 - -e
                 - |
                   exec pg_isready -U "$POSTGRES_USER" -h 127.0.0.1 -p 5432
+                  [ -f /opt/bitnami/postgresql/tmp/.initialized ] || [ -f /var/lib/postgresql/.initialized ]
             failureThreshold: 6
             initialDelaySeconds: 5
             periodSeconds: 10
@@ -147,7 +156,7 @@ spec:
             - name: tmp
               mountPath: /tmp
             - name: bounca-storage
-              mountPath: /var/lib/postgresql/data
+              mountPath: /var/lib/postgresql
       volumes:
         - name: dshm
           emptyDir:
@@ -161,7 +170,7 @@ spec:
           emptyDir: {}
         - name: bounca-storage
           hostPath:
-            path: /media/Hayate/bounca-psql/data
+            path: /media/Hayate/bounca-psql
             type: Directory
       nodeName: juno4a
 
