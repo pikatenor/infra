@@ -22,7 +22,7 @@ spec:
         fsGroup: 1001
       containers:
         - name: bounca
-          image: "mirror.gcr.io/aluveitie/bounca:latest@sha256:b6afb6fb8aab07da862b2e15105eb79c230a71b7dcb638fff720d1b226e5ef1f"
+          image: "mirror.gcr.io/aluveitie/bounca:0.4.5-r4@sha256:b6afb6fb8aab07da862b2e15105eb79c230a71b7dcb638fff720d1b226e5ef1f"
           imagePullPolicy: IfNotPresent
           env:
             - name: BOUNCA_FQDN

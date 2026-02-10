@@ -18,7 +18,7 @@ spec:
       - env:
         - name: MODE
           value: standalone
-        image: adolfintel/speedtest@sha256:1f828fe8337470d2ed5841176bfa6633fd94bda97261a636c35d0bef60a35270
+        image: ghcr.io/librespeed/speedtest:5.5@sha256:1c8ca636a9b68d023c819c5ce6e7fab3f5214b963138eb9ef6aaddf9ae111c77
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 3
