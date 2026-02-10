@@ -15,6 +15,16 @@
       "enabled": false
     },
     {
+      "groupName": "cert-manager",
+      "matchDatasources": ["docker"],
+      "matchPaths": [
+        "yuzu/**"
+      ],
+      "matchPackageNames": [
+        "quay.io/jetstack/cert-manager-*"
+      ]
+    },
+    {
       "matchUpdateTypes": ["patch", "pin", "digest"],
       "automerge": true
     }
