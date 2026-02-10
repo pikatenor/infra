@@ -17,7 +17,7 @@ spec:
       serviceAccountName: traefik-account
       containers:
         - name: traefik
-          image: traefik:v2.11@sha256:7590a0dbb5ca6af50936b50406f70b4cddd17f6ffdf36aa1fcac0a3b1f7e3113
+          image: traefik:v2.11@sha256:1adaeaea44762d9735a60e55710defc920b643d857fb7be4b1cbddd17e7080a8
           args:
             - --api.insecure
             - --entrypoints.web.Address=:80
