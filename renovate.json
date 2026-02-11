@@ -6,7 +6,9 @@
   ],
   "packageRules": [
     {
-      "matchDatasources": ["docker"],
+      "matchDatasources": [
+        "docker"
+      ],
       "matchPackageNames": [
         "mirror.gcr.io/bitnami/postgresql",
         "c.p1kachu.net/*",
@@ -15,15 +17,19 @@
       "enabled": false
     },
     {
-      "matchUpdateTypes": ["patch", "pin", "digest"],
+      "matchUpdateTypes": [
+        "patch",
+        "pin",
+        "digest"
+      ],
       "automerge": true
     }
   ],
   "kubernetes": {
-    "fileMatch": [
-      "^borg4/.+\\.ya?ml$",
-      "^starlight30/.+\\.ya?ml$",
-      "^yuzu/.+\\.ya?ml$"
+    "managerFilePatterns": [
+      "/^borg4/.+\\.ya?ml$/",
+      "/^starlight30/.+\\.ya?ml$/",
+      "/^yuzu/.+\\.ya?ml$/"
     ],
     "ignorePaths": [
       ".*fleet\\.yaml$",
