@@ -15,7 +15,7 @@ spec:
         workload.user.cattle.io/workloadselector: deployment-default-piping
     spec:
       containers:
-      - image: nwtgck/piping-server:v1.12.9@sha256:64a99b2ef21948ef84b97b8214fe6343d7d2658b5274c2d5d6797fc87571c7e1
+      - image: nwtgck/piping-server:v1.12.9@sha256:314978cb094e832f253e135d27caed690e44f392ea9edc5cadf8a34ffb73a301
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 3
