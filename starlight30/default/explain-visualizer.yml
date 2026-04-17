@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    workload.user.cattle.io/workloadselector: apps.deployment-default-explain-visualizer
+  name: explain-visualizer
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: apps.deployment-default-explain-visualizer
+  template:
+    metadata:
+      labels:
+        workload.user.cattle.io/workloadselector: apps.deployment-default-explain-visualizer
+      namespace: default
+    spec:
+      containers:
+        - image: c.p1kachu.net/explain-visualizer
+          imagePullPolicy: Always
+          name: app
+          ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP
+          resources: {}
+          livenessProbe:
+            failureThreshold: 3
+            successThreshold: 1
+            initialDelaySeconds: 0
+            timeoutSeconds: 1
+            periodSeconds: 10
+            httpGet:
+              scheme: HTTP
+              port: 80
+              path: /
+      imagePullSecrets:
+        - name: c.p1kachu.net
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: explain-visualizer
+  namespace: default
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+  selector:
+    workload.user.cattle.io/workloadselector: apps.deployment-default-explain-visualizer
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: explain-visualizer
+  namespace: default
+spec:
+  rules:
+    - host: es-visualizer.app.p1kachu.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: explain-visualizer
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
+
+
