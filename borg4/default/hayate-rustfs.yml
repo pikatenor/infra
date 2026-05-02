@@ -13,11 +13,12 @@ metadata:
   name: hayate-rustfs-config
   namespace: default
 data:
+  RUST_LOG: "warn"
   RUSTFS_ADDRESS: ":9000"
   RUSTFS_CONSOLE_ADDRESS: ":9001"
   RUSTFS_CONSOLE_ENABLE: "true"
   RUSTFS_OBS_LOG_DIRECTORY: "/logs"
-  RUSTFS_OBS_LOGGER_LEVEL: "info"
+  RUSTFS_OBS_LOGGER_LEVEL: "warn"
   RUSTFS_OBS_ENVIRONMENT: "development"
   RUSTFS_REGION: "ap-northeast-1"
   RUSTFS_VOLUMES: "/data"
