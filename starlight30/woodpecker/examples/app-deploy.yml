@@ -12,11 +12,13 @@
 # Prerequisites:
 #   1. RBAC (see rbac/ in infra repo) applied to k3s
 #   2. Woodpecker secrets registered:
-#      - registry_user / registry_pass  (for c.p1kachu.net)
-#      - k3s_kubeconfig                 (base64-encoded kubeconfig)
+#      - k3s_token  (ServiceAccount token for woodpecker-deploy)
+#
+# NOTE: plugin-docker-buildx v6 has a bug with insecure registries.
+#       Use v5 until https://codeberg.org/woodpecker-plugins/docker-buildx/issues/315 is fixed.
 
 variables:
-  - &image c.p1kachu.net/${CI_REPO_OWNER}/${CI_REPO_NAME}
+  - &image registry.registry-proxy.svc.cluster.local:5000/#REPLACE_WITH_IMAGE_NAME#
   - &tag ${CI_COMMIT_SHA:0:8}
 
 when:
@@ -24,27 +26,48 @@ when:
 
 steps:
   build-and-push:
-    image: woodpeckerci/plugin-docker-buildx:latest
+    image: woodpeckerci/plugin-docker-buildx:5-insecure
     settings:
       repo: *image
       tags:
         - *tag
         - latest
-      registry: https://c.p1kachu.net
-      username:
-        from_secret: registry_user
-      password:
-        from_secret: registry_pass
+      registry: registry.registry-proxy.svc.cluster.local:5000
+      insecure: true
+      buildkit_config: |
+        [registry."registry.registry-proxy.svc.cluster.local:5000"]
+          http = true
       dockerfile: Dockerfile
 
   deploy:
     image: bitnami/kubectl:latest
     environment:
-      KUBECONFIG_CONTENT:
-        from_secret: k3s_kubeconfig
+      SERVICE_ACCOUNT_TOKEN:
+        from_secret: k3s_token
     commands:
-      - mkdir -p $HOME/.kube && echo "$KUBECONFIG_CONTENT" | base64 -d > $HOME/.kube/config
-      - sed -i "s|image:.*${CI_REPO_NAME}.*|image: ${CI_REPO_NAME}:${CI_COMMIT_SHA:0:8}|" k8s/deployment.yml
+      - mkdir -p $HOME/.kube
+      - |
+        cat > $HOME/.kube/config <<EOF
+        apiVersion: v1
+        kind: Config
+        clusters:
+        - cluster:
+            server: https://kubernetes.default.svc
+            certificate-authority: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          name: k3s
+        contexts:
+        - context:
+            cluster: k3s
+            namespace: #REPLACE_WITH_NAMESPACE_NAME#
+            user: deployer
+          name: deploy
+        current-context: deploy
+        users:
+        - name: deployer
+          user:
+            token: $${SERVICE_ACCOUNT_TOKEN}
+        EOF
+      - sed -i "s|image:.*#REPLACE_WITH_IMAGE_NAME#.*|image: c.p1kachu.net/#REPLACE_WITH_IMAGE_NAME#:${CI_COMMIT_SHA:0:8}|" k8s/deployment.yml
       - kubectl apply -f k8s/
     when:
-      branch: master
+      branch: main
