@@ -1,0 +1,45 @@
+# RBAC for Woodpecker CI agent to deploy apps via kubectl
+# Apply to k3s cluster, then register the kubeconfig as a Woodpecker secret
+#
+# Usage:
+#   kubectl apply -f rbac-example.yml
+#   kubectl create token woodpecker-deploy -n default --duration=87600h
+#   # build a kubeconfig with that token, base64 encode it, register as Woodpecker org secret "k3s_kubeconfig"
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: woodpecker-deploy
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: woodpecker-deploy
+  namespace: default
+rules:
+  - apiGroups: ["", "apps", "batch", "networking.k8s.io"]
+    resources:
+      - deployments
+      - services
+      - configmaps
+      - secrets
+      - jobs
+      - pods
+      - ingresses
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: woodpecker-deploy
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: woodpecker-deploy
+    namespace: default
+roleRef:
+  kind: Role
+  apiGroup: rbac.authorization.k8s.io
+  name: woodpecker-deploy

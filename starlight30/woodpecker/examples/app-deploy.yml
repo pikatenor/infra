@@ -1,0 +1,48 @@
+# .woodpecker.yml — place in your app repo root
+#
+# App repo layout:
+#   .
+#   ├── Dockerfile
+#   ├── k8s/
+#   │   ├── deployment.yml
+#   │   ├── service.yml
+#   │   └── ingress.yml
+#   └── .woodpecker.yml
+#
+# Prerequisites:
+#   1. RBAC (see rbac/ in infra repo) applied to k3s
+#   2. Woodpecker secrets registered:
+#      - registry_user / registry_pass  (for c.p1kachu.net)
+#      - k3s_kubeconfig                 (base64-encoded kubeconfig)
+
+variables:
+  - &image c.p1kachu.net/${CI_REPO_OWNER}/${CI_REPO_NAME}
+  - &tag ${CI_COMMIT_SHA:0:8}
+
+steps:
+  build-and-push:
+    image: woodpeckerci/plugin-docker-buildx:latest
+    settings:
+      repo: *image
+      tags:
+        - *tag
+        - latest
+      registry: https://c.p1kachu.net
+      username:
+        from_secret: registry_user
+      password:
+        from_secret: registry_pass
+      dockerfile: Dockerfile
+
+  deploy:
+    image: bitnami/kubectl:latest
+    environment:
+      KUBECONFIG_CONTENT:
+        from_secret: k3s_kubeconfig
+    commands:
+      - mkdir -p $HOME/.kube && echo "$KUBECONFIG_CONTENT" | base64 -d > $HOME/.kube/config
+      - sed -i "s|image:.*${CI_REPO_NAME}.*|image: ${CI_REPO_NAME}:${CI_COMMIT_SHA:0:8}|" k8s/deployment.yml
+      - kubectl apply -f k8s/
+    when:
+      branch: master
+      event: push
