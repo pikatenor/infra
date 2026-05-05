@@ -16,6 +16,7 @@ helm:
         WOODPECKER_FORGEJO: "true"
         WOODPECKER_FORGEJO_URL: http://starlight30-starlight30-forgejo-http.forgejo.svc.cluster.local:3000
         WOODPECKER_OPEN: "true"
+        WOODPECKER_PLUGINS_PRIVILEGED: woodpeckerci/plugin-docker-buildx
       extraSecretNamesForEnvFrom: 
         - forgejo-client-secret
 

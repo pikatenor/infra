@@ -19,6 +19,9 @@ variables:
   - &image c.p1kachu.net/${CI_REPO_OWNER}/${CI_REPO_NAME}
   - &tag ${CI_COMMIT_SHA:0:8}
 
+when:
+  - event: push
+
 steps:
   build-and-push:
     image: woodpeckerci/plugin-docker-buildx:latest
@@ -45,4 +48,3 @@ steps:
       - kubectl apply -f k8s/
     when:
       branch: master
-      event: push
