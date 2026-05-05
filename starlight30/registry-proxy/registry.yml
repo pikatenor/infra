@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: registry
+  namespace: registry-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: registry
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: registry
+    spec:
+      containers:
+      - name: registry
+        image: registry:3
+        env:
+        - name: REGISTRY_HTTP_DEBUG_ADDR
+          value: 0.0.0.0:5001
+        - name: REGISTRY_HTTP_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: http-secret
+              key: secret
+        - name: REGISTRY_STORAGE
+          value: s3
+        - name: REGISTRY_STORAGE_S3_REGION
+          value: ap-tokyo-1
+        - name: REGISTRY_STORAGE_S3_REGIONENDPOINT
+          value: https://nrdcprlzxgzg.compat.objectstorage.ap-tokyo-1.oraclecloud.com/
+        - name: REGISTRY_STORAGE_S3_BUCKET
+          value: registry2
+        - name: REGISTRY_STORAGE_S3_FORCEPATHSTYLE
+          value: "true"
+        - name: REGISTRY_STORAGE_S3_ACCESSKEY
+          valueFrom:
+            secretKeyRef:
+              name: registry2-oracle-s3-accesskey
+              key: accessKey
+        - name: REGISTRY_STORAGE_S3_SECRETKEY
+          valueFrom:
+            secretKeyRef:
+              name: registry2-oracle-s3-accesskey
+              key: secretKey
+        ports:
+        - containerPort: 5000
+          name: http
+          protocol: TCP
+        - containerPort: 5001
+          name: httpdebug
+          protocol: TCP
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /debug/health
+            port: 5001
+          initialDelaySeconds: 10
+          periodSeconds: 2
+          timeoutSeconds: 2
+        resources: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: registry
+  namespace: registry-proxy
+spec:
+  ports:
+    - name: http
+      port: 5000
+      targetPort: http
+  selector:
+    app: registry
