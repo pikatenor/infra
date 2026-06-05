@@ -22,6 +22,11 @@ helm:
           SSH_LISTEN_PORT: 22
         service:
           DISABLE_REGISTRATION: true
+        service.explore:
+          REQUIRE_SIGNIN_VIEW: true
+          DISABLE_USERS_PAGE: true
+          DISABLE_ORGANIZATIONS_PAGE: true
+          DISABLE_CODE_PAGE: true
       admin:
         username: pikatenor
         passwordMode: initialOnlyRequireReset

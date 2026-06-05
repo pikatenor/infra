@@ -1,0 +1,45 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+    name: authentik
+    namespace: traefik
+spec:
+    forwardAuth:
+        address: http://ak-outpost-test.authentik.svc.cluster.local:9000/outpost.goauthentik.io/auth/traefik
+        trustForwardHeader: true
+        authResponseHeaders:
+            - X-authentik-username
+            - X-authentik-groups
+            - X-authentik-entitlements
+            - X-authentik-email
+            - X-authentik-name
+            - X-authentik-uid
+            - X-authentik-jwt
+            - X-authentik-meta-jwks
+            - X-authentik-meta-outpost
+            - X-authentik-meta-provider
+            - X-authentik-meta-app
+            - X-authentik-meta-version
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: whoami-auth
+  namespace: default
+spec:
+  rules:
+    - host: whoami-priv.app.p1kachu.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: whoami
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - whoami-priv.app.p1kachu.net
+      secretName: wild-cert
