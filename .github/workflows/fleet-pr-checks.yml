@@ -143,18 +143,21 @@ jobs:
             if is_helm_only_bundle "$bundle_dir"; then
               echo "Helm-only bundle; comparing fleet.yaml (skipping fleet apply chart render)." >> "$fleet_summary_file"
               set +e
-              diff_output="$(git diff --unified=3 "$base_sha" "$head_sha" -- "$fleet_file" 2>&1)"
+              git diff --quiet "$base_sha" "$head_sha" -- "$fleet_file"
               diff_code=$?
               set -e
 
               if [[ $diff_code -eq 0 ]]; then
                 echo "No fleet.yaml changes." >> "$fleet_summary_file"
-              else
+              elif [[ $diff_code -eq 1 ]]; then
                 echo "fleet.yaml changes detected." >> "$fleet_summary_file"
                 echo '```diff' >> "$fleet_summary_file"
-                printf "%s\n" "$diff_output" | head -c 16000 >> "$fleet_summary_file"
+                git diff --unified=3 "$base_sha" "$head_sha" -- "$fleet_file" | head -c 16000 >> "$fleet_summary_file"
                 echo >> "$fleet_summary_file"
                 echo '```' >> "$fleet_summary_file"
+              else
+                had_error="true"
+                echo "git diff failed (exit ${diff_code})." >> "$fleet_summary_file"
               fi
               echo >> "$fleet_summary_file"
               continue
