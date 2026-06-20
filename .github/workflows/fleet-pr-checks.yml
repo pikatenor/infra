@@ -145,9 +145,9 @@ jobs:
             head_out="$tmp_root/out/head-${safe_name}.yaml"
 
             set +e
-            base_render_output="$(fleet apply -o - "base-${safe_name}" "$tmp_root/base/$bundle_dir" 2>&1 > "$base_out")"
+            base_render_output="$(fleet apply --driven-scan -o - "base-${safe_name}" "$tmp_root/base/$bundle_dir" > "$base_out" 2>&1)"
             base_render_code=$?
-            head_render_output="$(fleet apply -o - "head-${safe_name}" "$bundle_dir" 2>&1 > "$head_out")"
+            head_render_output="$(fleet apply --driven-scan -o - "head-${safe_name}" "$bundle_dir" > "$head_out" 2>&1)"
             head_render_code=$?
             set -e
 
@@ -256,6 +256,12 @@ jobs:
           had_error="false"
           while IFS= read -r file; do
             echo "#### ${file}" >> "$summary_file"
+
+            if [[ "$(basename "$file")" =~ ^fleet\.ya?ml$ ]]; then
+              echo "Skipped (Fleet bundle config, not a cluster manifest)." >> "$summary_file"
+              echo >> "$summary_file"
+              continue
+            fi
 
             set +e
             diff_output="$(kubediff --skip-secrets -f "$file" 2>&1)"
