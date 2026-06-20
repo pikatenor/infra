@@ -1,0 +1,70 @@
+---
+# Cluster-scoped read-only for kubectl diff on downstream clusters (secrets excluded).
+apiVersion: management.cattle.io/v3
+kind: RoleTemplate
+metadata:
+  name: fleet-ci-cluster-readonly
+builtin: false
+context: cluster
+rules:
+  - apiGroups: [""]
+    resources:
+      - bindings
+      - configmaps
+      - endpoints
+      - events
+      - limitranges
+      - namespaces
+      - nodes
+      - persistentvolumeclaims
+      - persistentvolumes
+      - pods
+      - pods/log
+      - podtemplates
+      - replicationcontrollers
+      - resourcequotas
+      - serviceaccounts
+      - services
+    verbs: ["get", "list"]
+  # NOTE: apiGroups ["*"] includes core "" and therefore grants secrets.
+  # List extension API groups explicitly instead.
+  - apiGroups:
+      - apps
+      - batch
+      - extensions
+      - autoscaling
+      - networking.k8s.io
+      - policy
+      - rbac.authorization.k8s.io
+      - admissionregistration.k8s.io
+      - apiextensions.k8s.io
+      - apiregistration.k8s.io
+      - scheduling.k8s.io
+      - storage.k8s.io
+      - certificates.k8s.io
+      - coordination.k8s.io
+      - discovery.k8s.io
+      - node.k8s.io
+      - metrics.k8s.io
+      - cert-manager.io
+      - traefik.io
+      - traefik.containo.us
+      - metallb.io
+      - datadoghq.com
+      - helm.cattle.io
+      - fleet.cattle.io
+      - monitoring.coreos.com
+    resources: ["*"]
+    verbs: ["get", "list"]
+---
+# Management cluster: read Fleet GitRepo status for post-merge convergence checks.
+apiVersion: management.cattle.io/v3
+kind: RoleTemplate
+metadata:
+  name: fleet-ci-fleet-readonly
+builtin: false
+context: cluster
+rules:
+  - apiGroups: ["fleet.cattle.io"]
+    resources: ["gitrepos"]
+    verbs: ["get", "list", "watch"]

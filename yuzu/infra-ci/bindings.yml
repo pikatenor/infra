@@ -1,0 +1,35 @@
+---
+# Downstream clusters: kubectl diff via Rancher proxy.
+apiVersion: management.cattle.io/v3
+kind: ClusterRoleTemplateBinding
+metadata:
+  name: fleet-ci-cluster-readonly
+  namespace: c-m-r88j4s44
+  annotations:
+    auth.cattle.io/principal-display-name: Fleet CI
+clusterName: c-m-r88j4s44
+roleTemplateName: fleet-ci-cluster-readonly
+userPrincipalName: local://u-fqn4t
+---
+apiVersion: management.cattle.io/v3
+kind: ClusterRoleTemplateBinding
+metadata:
+  name: fleet-ci-cluster-readonly
+  namespace: c-m-dvj2sq9m
+  annotations:
+    auth.cattle.io/principal-display-name: Fleet CI
+clusterName: c-m-dvj2sq9m
+roleTemplateName: fleet-ci-cluster-readonly
+userPrincipalName: local://u-fqn4t
+---
+# Management (local) cluster: Fleet GitRepo convergence checks.
+apiVersion: management.cattle.io/v3
+kind: ClusterRoleTemplateBinding
+metadata:
+  name: fleet-ci-fleet-readonly
+  namespace: local
+  annotations:
+    auth.cattle.io/principal-display-name: Fleet CI
+clusterName: local
+roleTemplateName: fleet-ci-fleet-readonly
+userPrincipalName: local://u-fqn4t
