@@ -1,0 +1,365 @@
+name: Fleet PR Checks
+
+on:
+  pull_request:
+    branches:
+      - master
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: fleet-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  validate-and-diff:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - cluster: borg4
+            dir: borg4/
+            context: borg4
+          - cluster: starlight30
+            dir: starlight30/
+            context: starlight30
+    env:
+      KUBECONFIG_B64: ${{ secrets.FLEET_KUBECONFIG_B64 }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed YAML files
+        id: changed
+        shell: bash
+        run: |
+          set -euo pipefail
+          base_sha="${{ github.event.pull_request.base.sha }}"
+          head_sha="${{ github.event.pull_request.head.sha }}"
+          target_dir="${{ matrix.dir }}"
+
+          all_changed_file="all-changed-files-${{ matrix.cluster }}.txt"
+          changed_file="changed-files-${{ matrix.cluster }}.txt"
+
+          git diff --name-only "$base_sha" "$head_sha" -- '*.yml' '*.yaml' > "$all_changed_file"
+          grep -E "^${target_dir}.*\.(yml|yaml)$" "$all_changed_file" > "$changed_file" || true
+
+          if [[ -s "$changed_file" ]]; then
+            {
+              echo "has_files=true"
+              echo "files<<EOF"
+              cat "$changed_file"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          else
+            echo "has_files=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: No changed manifests for this cluster
+        if: steps.changed.outputs.has_files != 'true'
+        run: |
+          {
+            echo "## Fleet PR Checks (${{ matrix.cluster }})"
+            echo
+            echo "No YAML changes detected under ${{ matrix.dir }} in this PR."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Install yamllint
+        if: steps.changed.outputs.has_files == 'true'
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install yamllint
+
+      - name: Run yamllint on changed files
+        if: steps.changed.outputs.has_files == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          xargs -r yamllint -d '{extends: relaxed, rules: {line-length: disable}}' < "changed-files-${{ matrix.cluster }}.txt"
+
+      - name: Install Fleet CLI
+        if: steps.changed.outputs.has_files == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSL -o fleet https://github.com/rancher/fleet/releases/latest/download/fleet-linux-amd64
+          chmod +x fleet
+          sudo mv fleet /usr/local/bin/fleet
+          fleet --version
+
+      - name: Diff Fleet bundles from fleet.yaml changes
+        if: steps.changed.outputs.has_files == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          base_sha="${{ github.event.pull_request.base.sha }}"
+          changed_file="changed-files-${{ matrix.cluster }}.txt"
+          fleet_summary_file="fleet-bundle-summary-${{ matrix.cluster }}.md"
+
+          mapfile -t fleet_files < <(grep -E '/fleet\.ya?ml$' "$changed_file" || true)
+
+          {
+            echo "### Fleet bundle diff"
+            echo
+          } > "$fleet_summary_file"
+
+          if [[ ${#fleet_files[@]} -eq 0 ]]; then
+            echo "No changed fleet.yaml in this cluster scope." >> "$fleet_summary_file"
+            exit 0
+          fi
+
+          tmp_root="$(mktemp -d)"
+          trap 'rm -rf "$tmp_root"' EXIT
+
+          had_error="false"
+          for fleet_file in "${fleet_files[@]}"; do
+            bundle_dir="$(dirname "$fleet_file")"
+            safe_name="$(echo "$bundle_dir" | tr '/.' '__')"
+
+            echo "#### ${bundle_dir}" >> "$fleet_summary_file"
+
+            mkdir -p "$tmp_root/base"
+            mkdir -p "$tmp_root/out"
+
+            if ! git archive "$base_sha" "$bundle_dir" | tar -x -C "$tmp_root/base"; then
+              echo "Failed to extract base revision for ${bundle_dir}." >> "$fleet_summary_file"
+              had_error="true"
+              echo >> "$fleet_summary_file"
+              continue
+            fi
+
+            base_out="$tmp_root/out/base-${safe_name}.yaml"
+            head_out="$tmp_root/out/head-${safe_name}.yaml"
+
+            set +e
+            base_render_output="$(fleet apply -o - "base-${safe_name}" "$tmp_root/base/$bundle_dir" 2>&1 > "$base_out")"
+            base_render_code=$?
+            head_render_output="$(fleet apply -o - "head-${safe_name}" "$bundle_dir" 2>&1 > "$head_out")"
+            head_render_code=$?
+            set -e
+
+            if [[ $base_render_code -ne 0 || $head_render_code -ne 0 ]]; then
+              had_error="true"
+              echo "Fleet render failed." >> "$fleet_summary_file"
+              if [[ -n "$base_render_output" ]]; then
+                echo '```text' >> "$fleet_summary_file"
+                echo "[base]" >> "$fleet_summary_file"
+                printf "%s\n" "$base_render_output" | head -c 8000 >> "$fleet_summary_file"
+                echo >> "$fleet_summary_file"
+                echo '```' >> "$fleet_summary_file"
+              fi
+              if [[ -n "$head_render_output" ]]; then
+                echo '```text' >> "$fleet_summary_file"
+                echo "[head]" >> "$fleet_summary_file"
+                printf "%s\n" "$head_render_output" | head -c 8000 >> "$fleet_summary_file"
+                echo >> "$fleet_summary_file"
+                echo '```' >> "$fleet_summary_file"
+              fi
+              echo >> "$fleet_summary_file"
+              continue
+            fi
+
+            set +e
+            diff_output="$(diff -u "$base_out" "$head_out" 2>&1)"
+            diff_code=$?
+            set -e
+
+            if [[ $diff_code -eq 0 ]]; then
+              echo "No rendered bundle changes." >> "$fleet_summary_file"
+            else
+              echo "Rendered bundle changes detected." >> "$fleet_summary_file"
+              echo '```diff' >> "$fleet_summary_file"
+              printf "%s\n" "$diff_output" | head -c 16000 >> "$fleet_summary_file"
+              echo >> "$fleet_summary_file"
+              echo '```' >> "$fleet_summary_file"
+            fi
+
+            echo >> "$fleet_summary_file"
+          done
+
+          if [[ "$had_error" == "true" ]]; then
+            echo "FLEET_BUNDLE_DIFF_ERROR=true" >> "$GITHUB_ENV"
+          fi
+
+      - name: Setup kubectl
+        if: steps.changed.outputs.has_files == 'true' && env.KUBECONFIG_B64 != ''
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubeconfig
+        if: steps.changed.outputs.has_files == 'true' && env.KUBECONFIG_B64 != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.kube"
+          echo "$KUBECONFIG_B64" | base64 --decode > "$HOME/.kube/config"
+          chmod 600 "$HOME/.kube/config"
+
+      - name: Switch kubectl context
+        if: steps.changed.outputs.has_files == 'true' && env.KUBECONFIG_B64 != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! kubectl config get-contexts -o name | grep -Fxq "${{ matrix.context }}"; then
+            echo "Context '${{ matrix.context }}' not found in kubeconfig." >&2
+            echo "Available contexts:" >&2
+            kubectl config get-contexts -o name >&2
+            exit 1
+          fi
+          kubectl config use-context "${{ matrix.context }}"
+
+      - name: Run kubectl diff on changed files
+        if: steps.changed.outputs.has_files == 'true' && env.KUBECONFIG_B64 != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          changed_file="changed-files-${{ matrix.cluster }}.txt"
+          summary_file="pr-check-summary-${{ matrix.cluster }}.md"
+
+          {
+            echo "## Fleet PR Checks (${{ matrix.cluster }})"
+            echo
+            echo "### Changed files"
+            while IFS= read -r file; do
+              echo "- ${file}"
+            done < "$changed_file"
+            echo
+            echo "### kubectl diff"
+          } > "$summary_file"
+
+          had_error="false"
+          while IFS= read -r file; do
+            echo "#### ${file}" >> "$summary_file"
+
+            set +e
+            diff_output="$(kubectl diff -f "$file" 2>&1)"
+            diff_code=$?
+            set -e
+
+            if [[ $diff_code -eq 0 ]]; then
+              echo "No changes from cluster state." >> "$summary_file"
+            elif [[ $diff_code -eq 1 ]]; then
+              echo "Changes detected." >> "$summary_file"
+            else
+              echo "kubectl diff failed (exit ${diff_code})." >> "$summary_file"
+              had_error="true"
+            fi
+
+            if [[ -n "$diff_output" ]]; then
+              echo '```diff' >> "$summary_file"
+              printf "%s\n" "$diff_output" | head -c 12000 >> "$summary_file"
+              echo >> "$summary_file"
+              echo '```' >> "$summary_file"
+            fi
+            echo >> "$summary_file"
+          done < "$changed_file"
+
+          if [[ -f "fleet-bundle-summary-${{ matrix.cluster }}.md" ]]; then
+            echo >> "$summary_file"
+            cat "fleet-bundle-summary-${{ matrix.cluster }}.md" >> "$summary_file"
+          fi
+
+          cat "$summary_file" >> "$GITHUB_STEP_SUMMARY"
+
+          if [[ "$had_error" == "true" ]]; then
+            exit 1
+          fi
+
+          if [[ "${FLEET_BUNDLE_DIFF_ERROR:-}" == "true" ]]; then
+            exit 1
+          fi
+
+      - name: Build summary without cluster diff
+        if: steps.changed.outputs.has_files == 'true' && env.KUBECONFIG_B64 == ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          base_sha="${{ github.event.pull_request.base.sha }}"
+          head_sha="${{ github.event.pull_request.head.sha }}"
+          changed_file="changed-files-${{ matrix.cluster }}.txt"
+          summary_file="pr-check-summary-${{ matrix.cluster }}.md"
+
+          {
+            echo "## Fleet PR Checks (${{ matrix.cluster }})"
+            echo
+            echo "### Changed files"
+            while IFS= read -r file; do
+              echo "- ${file}"
+            done < "$changed_file"
+            echo
+            echo "### Git diff"
+            echo '```diff'
+            xargs -r git diff --unified=3 "$base_sha" "$head_sha" -- < "$changed_file" | head -c 60000
+            echo
+            echo '```'
+            echo
+            echo "Cluster diff was skipped because FLEET_KUBECONFIG_B64 is not configured."
+          } > "$summary_file"
+
+          if [[ -f "fleet-bundle-summary-${{ matrix.cluster }}.md" ]]; then
+            echo >> "$summary_file"
+            cat "fleet-bundle-summary-${{ matrix.cluster }}.md" >> "$summary_file"
+          fi
+
+          cat "$summary_file" >> "$GITHUB_STEP_SUMMARY"
+
+          if [[ "${FLEET_BUNDLE_DIFF_ERROR:-}" == "true" ]]; then
+            exit 1
+          fi
+
+      - name: Comment summary to PR
+        if: steps.changed.outputs.has_files == 'true'
+        uses: actions/github-script@v7
+        env:
+          SUMMARY_PATH: pr-check-summary-${{ matrix.cluster }}.md
+          MARKER: "<!-- fleet-pr-check-summary-${{ matrix.cluster }} -->"
+        with:
+          script: |
+            const fs = require('fs')
+            const marker = process.env.MARKER
+            let body = fs.readFileSync(process.env.SUMMARY_PATH, 'utf8')
+            if (body.length > 60000) {
+              body = body.slice(0, 60000) + '\n\n...truncated...'
+            }
+            body = `${marker}\n${body}`
+
+            const { owner, repo } = context.repo
+            const issue_number = context.issue.number
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number,
+              per_page: 100
+            })
+
+            const previous = comments.find((comment) => {
+              return comment.user.type === 'Bot' && comment.body && comment.body.includes(marker)
+            })
+
+            if (previous) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: previous.id,
+                body
+              })
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body
+              })
+            }
