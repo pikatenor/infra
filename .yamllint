@@ -10,8 +10,6 @@ rules:
 
 # Vendored / generated manifests — not hand-authored, must not be reformatted.
 ignore:
-  - oracle/.terraform/
-  - starlight30/garm/garm_operator_all.yaml
   - yuzu/cattle-system/rancher.yml
   - yuzu/cert-manager/cert-manager.yaml
   - yuzu/traefik/01-crd.yml
