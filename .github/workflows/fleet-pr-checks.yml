@@ -218,7 +218,20 @@ jobs:
           fi
           kubectl config use-context "${{ matrix.context }}"
 
-      - name: Run kubectl diff on changed files
+      - name: Install kubediff
+        if: steps.changed.outputs.has_files == 'true' && env.KUBECONFIG_B64 != ''
+        shell: bash
+        env:
+          KUBEDIFF_VERSION: v1.33.4
+        run: |
+          set -euo pipefail
+          tmpdir="$(mktemp -d)"
+          curl -sSL "https://github.com/sepich/kubediff/releases/download/${KUBEDIFF_VERSION}/kubediff-linux-amd64.tar.gz" \
+            | tar -xz -C "$tmpdir"
+          sudo mv "$tmpdir/kubediff" /usr/local/bin/kubediff
+          kubediff -v
+
+      - name: Run kubediff on changed files
         if: steps.changed.outputs.has_files == 'true' && env.KUBECONFIG_B64 != ''
         shell: bash
         run: |
@@ -235,7 +248,7 @@ jobs:
               echo "- ${file}"
             done < "$changed_file"
             echo
-            echo "### kubectl diff"
+            echo "### Cluster diff (kubediff)"
           } > "$summary_file"
 
           had_error="false"
@@ -243,7 +256,7 @@ jobs:
             echo "#### ${file}" >> "$summary_file"
 
             set +e
-            diff_output="$(kubectl diff -f "$file" 2>&1)"
+            diff_output="$(kubediff --skip-secrets -f "$file" 2>&1)"
             diff_code=$?
             set -e
 
@@ -252,7 +265,7 @@ jobs:
             elif [[ $diff_code -eq 1 ]]; then
               echo "Changes detected." >> "$summary_file"
             else
-              echo "kubectl diff failed (exit ${diff_code})." >> "$summary_file"
+              echo "Cluster diff failed (exit ${diff_code})." >> "$summary_file"
               had_error="true"
             fi
 
