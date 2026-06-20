@@ -173,7 +173,6 @@ spec:
             path: /media/Hayate/bounca-psql
             type: Directory
       nodeName: juno4a
-
 ---
 apiVersion: v1
 kind: Service
@@ -182,10 +181,10 @@ metadata:
   namespace: default
 spec:
   ports:
-  - name: http8000
-    port: 80
-    protocol: TCP
-    targetPort: 8080
+    - name: http8000
+      port: 80
+      protocol: TCP
+      targetPort: 8080
   selector:
     workload.user.cattle.io/workloadselector: deployment-default-bounca
   sessionAffinity: None

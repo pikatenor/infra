@@ -16,27 +16,26 @@ spec:
         workload.user.cattle.io/workloadselector: deployment-default-saas
     spec:
       containers:
-      - name: saas
-        image: c.p1kachu.net/saas
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 80
-          name: http-alt
-          protocol: TCP
-        livenessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /
-            port: 80
-            scheme: HTTP
-          initialDelaySeconds: 10
-          periodSeconds: 2
-          successThreshold: 1
-          timeoutSeconds: 2
-        resources: {}
+        - name: saas
+          image: c.p1kachu.net/saas
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+              name: http-alt
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 80
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 2
+            successThreshold: 1
+            timeoutSeconds: 2
+          resources: {}
       imagePullSecrets:
-      - name: c.p1kachu.net
-
+        - name: c.p1kachu.net
 ---
 apiVersion: v1
 kind: Service
@@ -49,7 +48,6 @@ spec:
       targetPort: http-alt
   selector:
     workload.user.cattle.io/workloadselector: deployment-default-saas
-
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -67,7 +65,7 @@ spec:
                 port:
                   number: 80
             path: /
-            pathType: Prefix 
+            pathType: Prefix
   tls:
     - hosts:
         - saas.app.p1kachu.net

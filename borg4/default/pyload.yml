@@ -51,8 +51,7 @@ spec:
               value: Asia/Tokyo
           resources: {}
       nodeName: juno4a
-      nodeSelector:
-        {}
+      nodeSelector: {}
       restartPolicy: Always
       volumes:
         - hostPath:
@@ -63,7 +62,6 @@ spec:
             type: DirectoryOrCreate
             path: /media/Hayate/Downloads/pyload
           name: download
-
 ---
 apiVersion: v1
 kind: Service
@@ -72,14 +70,14 @@ metadata:
   namespace: default
 spec:
   ports:
-  - name: http8000
-    port: 80
-    protocol: TCP
-    targetPort: 8000
-  - name: http9666
-    port: 9666
-    protocol: TCP
-    targetPort: 9666
+    - name: http8000
+      port: 80
+      protocol: TCP
+      targetPort: 8000
+    - name: http9666
+      port: 9666
+      protocol: TCP
+      targetPort: 9666
   selector:
     workload.user.cattle.io/workloadselector: apps.deployment-default-pyload
   sessionAffinity: None

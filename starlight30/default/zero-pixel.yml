@@ -16,27 +16,26 @@ spec:
         workload.user.cattle.io/workloadselector: deployment-default-zero-pixel
     spec:
       containers:
-      - name: zero-pixel
-        image: c.p1kachu.net/zero-pixel
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 80
-          name: http
-          protocol: TCP
-        livenessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /
-            port: 80
-            scheme: HTTP
-          initialDelaySeconds: 10
-          periodSeconds: 2
-          successThreshold: 1
-          timeoutSeconds: 2
-        resources: {}
+        - name: zero-pixel
+          image: c.p1kachu.net/zero-pixel
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 80
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 2
+            successThreshold: 1
+            timeoutSeconds: 2
+          resources: {}
       imagePullSecrets:
-      - name: c.p1kachu.net
-
+        - name: c.p1kachu.net
 ---
 apiVersion: v1
 kind: Service
@@ -45,14 +44,13 @@ metadata:
   namespace: default
 spec:
   ports:
-  - name: http
-    port: 80
-    protocol: TCP
-    targetPort: 80
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 80
   selector:
     workload.user.cattle.io/workloadselector: deployment-default-zero-pixel
   type: ClusterIP
-
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -70,7 +68,7 @@ spec:
                 port:
                   number: 80
             path: /
-            pathType: Prefix 
+            pathType: Prefix
   tls:
     - hosts:
         - 0px.org

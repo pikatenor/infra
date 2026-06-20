@@ -16,37 +16,36 @@ spec:
         workload.user.cattle.io/workloadselector: deployment-default-ado
     spec:
       containers:
-      - name: ado
-        image: c.p1kachu.net/ado
-        ports:
-        - containerPort: 9292
-          name: 9292tcp802
-          protocol: TCP
-        livenessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /healthz
-            port: 9292
-            scheme: HTTP
-          initialDelaySeconds: 10
-          periodSeconds: 2
-          successThreshold: 1
-          timeoutSeconds: 2
-        readinessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /healthz
-            port: 9292
-            scheme: HTTP
-          initialDelaySeconds: 10
-          periodSeconds: 2
-          successThreshold: 2
-          timeoutSeconds: 2
-        resources: {}
+        - name: ado
+          image: c.p1kachu.net/ado
+          ports:
+            - containerPort: 9292
+              name: 9292tcp802
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 9292
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 2
+            successThreshold: 1
+            timeoutSeconds: 2
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 9292
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 2
+            successThreshold: 2
+            timeoutSeconds: 2
+          resources: {}
       imagePullSecrets:
-      - name: p1kachu
-      - name: c.p1kachu.net
-
+        - name: p1kachu
+        - name: c.p1kachu.net
 ---
 apiVersion: v1
 kind: Service

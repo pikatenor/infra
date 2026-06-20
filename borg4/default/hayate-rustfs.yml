@@ -5,7 +5,6 @@ metadata:
   name: hayate-rustfs
   namespace: default
 automountServiceAccountToken: true
-
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -32,12 +31,11 @@ metadata:
   name: hayate-rustfs-logs
   namespace: default
 spec:
-  accessModes: [ ReadWriteOnce ]
+  accessModes: [ReadWriteOnce]
   storageClassName: local-path
   resources:
     requests:
       storage: 256Mi
-
 ---
 apiVersion: v1
 kind: Service
@@ -59,7 +57,6 @@ spec:
   selector:
     app.kubernetes.io/name: rustfs
     app.kubernetes.io/instance: hayate-rustfs
-
 ---
 apiVersion: v1
 kind: Service
@@ -75,7 +72,6 @@ spec:
   selector:
     app.kubernetes.io/name: rustfs
     app.kubernetes.io/instance: hayate-rustfs
-
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -99,8 +95,7 @@ spec:
         app.kubernetes.io/name: rustfs
         app.kubernetes.io/instance: hayate-rustfs
     spec:
-      imagePullSecrets:
-        []
+      imagePullSecrets: []
       nodeSelector:
         kubernetes.io/hostname: "juno4a"
       securityContext:
@@ -115,7 +110,7 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop:
-              - ALL
+                - ALL
             readOnlyRootFilesystem: true
             runAsNonRoot: true
           command:
@@ -138,7 +133,7 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop:
-              - ALL
+                - ALL
             readOnlyRootFilesystem: true
             runAsNonRoot: true
           ports:
@@ -151,8 +146,7 @@ spec:
                 name: hayate-rustfs-config
             - secretRef:
                 name: rustfs-secret
-          resources:
-            {}
+          resources: {}
           livenessProbe:
             failureThreshold: 3
             httpGet:

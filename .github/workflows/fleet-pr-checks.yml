@@ -83,9 +83,11 @@ jobs:
       - name: Run yamllint on changed files
         if: steps.changed.outputs.has_files == 'true'
         shell: bash
+        # Uses the repo-root .yamllint (relaxed + line-length disabled, generated
+        # manifests ignored). Do not pass `-d` here, or it overrides that file.
         run: |
           set -euo pipefail
-          xargs -r yamllint -d '{extends: relaxed, rules: {line-length: disable}}' < "changed-files-${{ matrix.cluster }}.txt"
+          xargs -r yamllint < "changed-files-${{ matrix.cluster }}.txt"
 
       - name: Install Fleet CLI
         if: steps.changed.outputs.has_files == 'true'
