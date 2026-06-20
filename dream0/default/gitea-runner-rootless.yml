@@ -28,40 +28,40 @@ spec:
       securityContext:
         fsGroup: 1000
       containers:
-      - name: runner
-        image: gitea/act_runner:nightly-dind-rootless
-        imagePullPolicy: Always
-        env:
-        - name: DOCKER_HOST
-          value: tcp://localhost:2376
-        - name: DOCKER_CERT_PATH
-          value: /certs/client
-        - name: DOCKER_TLS_VERIFY
-          value: "1"
-        - name: GITEA_INSTANCE_URL
-          value: http://gitea.default.svc.cluster.local:3000
-        - name: GITEA_RUNNER_REGISTRATION_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: gitea-runner-secret
-              key: registration-token
-        - name: GITEA_RUNNER_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: spec.nodeName
-        - name: GITEA_RUNNER_LABELS
-          value: "dind-rootless:docker://ghcr.io/catthehacker/ubuntu:runner-latest"
-        - name: CONFIG_FILE
-          value: /config.yaml
-        securityContext:
-          privileged: true
-        volumeMounts:
-        - name: gitea-act-runner-data
-          mountPath: /data
-        - name: config
-          mountPath: /config.yaml
-          subPath: config.yaml
-        resources: {}
+        - name: runner
+          image: gitea/act_runner:nightly-dind-rootless
+          imagePullPolicy: Always
+          env:
+            - name: DOCKER_HOST
+              value: tcp://localhost:2376
+            - name: DOCKER_CERT_PATH
+              value: /certs/client
+            - name: DOCKER_TLS_VERIFY
+              value: "1"
+            - name: GITEA_INSTANCE_URL
+              value: http://gitea.default.svc.cluster.local:3000
+            - name: GITEA_RUNNER_REGISTRATION_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: gitea-runner-secret
+                  key: registration-token
+            - name: GITEA_RUNNER_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: GITEA_RUNNER_LABELS
+              value: "dind-rootless:docker://ghcr.io/catthehacker/ubuntu:runner-latest"
+            - name: CONFIG_FILE
+              value: /config.yaml
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: gitea-act-runner-data
+              mountPath: /data
+            - name: config
+              mountPath: /config.yaml
+              subPath: config.yaml
+          resources: {}
       volumes:
         - name: config
           configMap:
@@ -76,12 +76,12 @@ spec:
                     values:
                       - member
   volumeClaimTemplates:
-  - metadata:
-      name: gitea-act-runner-data
-    spec:
-      accessModes:
-      - ReadWriteOnce
-      storageClassName: nfs
-      resources:
-        requests:
-          storage: 1Gi
+    - metadata:
+        name: gitea-act-runner-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: nfs
+        resources:
+          requests:
+            storage: 1Gi

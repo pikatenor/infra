@@ -1,0 +1,17 @@
+---
+# Repository-wide yamllint config.
+#
+# CI (.github/workflows/fleet-pr-checks.yml) runs `yamllint` without `-d`, so it
+# picks up this file. Keep these in sync if you change rule levels.
+extends: relaxed
+
+rules:
+  line-length: disable
+
+# Vendored / generated manifests — not hand-authored, must not be reformatted.
+ignore:
+  - oracle/.terraform/
+  - starlight30/garm/garm_operator_all.yaml
+  - yuzu/cattle-system/rancher.yml
+  - yuzu/cert-manager/cert-manager.yaml
+  - yuzu/traefik/01-crd.yml

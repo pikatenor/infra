@@ -20,7 +20,6 @@ spec:
           ports:
             - name: web
               containerPort: 80
-
 ---
 apiVersion: v1
 kind: Service
@@ -33,7 +32,6 @@ spec:
       targetPort: web
   selector:
     app: logo
-
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -41,17 +39,17 @@ metadata:
   name: logo-tls-ingress
 spec:
   tls:
-  - hosts:
-      - '*.yuzu.p1kachu.net'
-      - yuzu.p1kachu.net
-    secretName: yuzu-wild
+    - hosts:
+        - '*.yuzu.p1kachu.net'
+        - yuzu.p1kachu.net
+      secretName: yuzu-wild
   rules:
-  - http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: logo
-            port:
-              name: web
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: logo
+                port:
+                  name: web

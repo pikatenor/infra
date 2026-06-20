@@ -31,21 +31,21 @@ spec:
     spec:
       restartPolicy: Always
       containers:
-      - name: cache-server
-        image: gitea/act_runner:nightly
-        imagePullPolicy: Always
-        command: ["/sbin/tini", "--", "act_runner", "-c", "/config.yaml", "cache-server"]
-        volumeMounts:
-        - name: actcache
-          mountPath: /actcache
-        - mountPath: /config.yaml
-          name: config
-          subPath: config.yaml
-        resources: {}
-        ports:
-        - containerPort: 80
-          name: http
-          protocol: TCP
+        - name: cache-server
+          image: gitea/act_runner:nightly
+          imagePullPolicy: Always
+          command: ["/sbin/tini", "--", "act_runner", "-c", "/config.yaml", "cache-server"]
+          volumeMounts:
+            - name: actcache
+              mountPath: /actcache
+            - mountPath: /config.yaml
+              name: config
+              subPath: config.yaml
+          resources: {}
+          ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP
       volumes:
         - name: actcache
           hostPath:

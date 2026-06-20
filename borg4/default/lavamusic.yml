@@ -22,48 +22,48 @@ spec:
         workload.user.cattle.io/workloadselector: deployment-default-lavamusic
     spec:
       initContainers:
-      - name: permission
-        image: busybox:1.38.0@sha256:fd8d9aa63ba2f0982b5304e1ee8d3b90a210bc1ffb5314d980eb6962f1a9715d
-        command: ["sh", "-c", "chown -R 1000:1000 /db"]
-        volumeMounts:
-        - name: db
-          mountPath: /db
+        - name: permission
+          image: busybox:1.38.0@sha256:fd8d9aa63ba2f0982b5304e1ee8d3b90a210bc1ffb5314d980eb6962f1a9715d
+          command: ["sh", "-c", "chown -R 1000:1000 /db"]
+          volumeMounts:
+            - name: db
+              mountPath: /db
       containers:
-      - image: c.p1kachu.net/lavamusic@sha256:6aae004d198ca9297c67ec7698d50cfa49d5da9e2a6a6d6f406e06d776a6b380
-        imagePullPolicy: Always
-        command:
-          - sh
-          - -c
-          - |
-            set -ex
-            touch /db/lavamusic.db
-            ln -s /db/lavamusic.db /opt/lavamusic/prisma/lavamusic.db
-            npx prisma generate
-            npx prisma db push
-            exec node /opt/lavamusic/dist/index.js
-        env:
-        - name: NODES
-          value: >-
+        - image: c.p1kachu.net/lavamusic@sha256:6aae004d198ca9297c67ec7698d50cfa49d5da9e2a6a6d6f406e06d776a6b380
+          imagePullPolicy: Always
+          command:
+            - sh
+            - -c
+            - |
+              set -ex
+              touch /db/lavamusic.db
+              ln -s /db/lavamusic.db /opt/lavamusic/prisma/lavamusic.db
+              npx prisma generate
+              npx prisma db push
+              exec node /opt/lavamusic/dist/index.js
+          env:
+            - name: NODES
+              value: >-
                 [{"id":"main","host":"lavalink.default","port":8080,"authorization":"crumpet-stuffy-encourage"}]
-        - name: OWNER_IDS
-          value: "[\"455614659324542976\"]"
-        - name: CLIENT_ID
-          value: ""
-        - name: TOKEN
-          valueFrom:
-            secretKeyRef:
-              key: TOKEN
-              name: orpheus-token
-        name: lavamusic
-        resources: {}
-        securityContext:
-          runAsNonRoot: false
-          readOnlyRootFilesystem: false
-          privileged: false
-          allowPrivilegeEscalation: false
-        volumeMounts:
-        - name: db
-          mountPath: /db
+            - name: OWNER_IDS
+              value: "[\"455614659324542976\"]"
+            - name: CLIENT_ID
+              value: ""
+            - name: TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: TOKEN
+                  name: orpheus-token
+          name: lavamusic
+          resources: {}
+          securityContext:
+            runAsNonRoot: false
+            readOnlyRootFilesystem: false
+            privileged: false
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - name: db
+              mountPath: /db
         #- name: locales
         #  mountPath: /opt/lavamusic/locales
       imagePullSecrets:
@@ -76,7 +76,6 @@ spec:
           emptyDir: {}
       dnsPolicy: ClusterFirst
       restartPolicy: Always
-
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -91,7 +90,6 @@ spec:
     - ReadWriteOnce
   storageClassName: ''
   volumeName: lavamusic-data
-
 ---
 apiVersion: v1
 kind: PersistentVolume

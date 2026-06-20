@@ -4,7 +4,7 @@ helm:
   chart: oci://ghcr.io/woodpecker-ci/helm/woodpecker
   version: 3.5.1
 
-  values: 
+  values:
     agent:
       replicaCount: 1
       env:
@@ -17,7 +17,7 @@ helm:
         WOODPECKER_FORGEJO_URL: http://starlight30-starlight30-forgejo-http.forgejo.svc.cluster.local:3000
         WOODPECKER_OPEN: "true"
         WOODPECKER_PLUGINS_PRIVILEGED: woodpeckerci/plugin-docker-buildx
-      extraSecretNamesForEnvFrom: 
+      extraSecretNamesForEnvFrom:
         - forgejo-client-secret
 
       ingress:

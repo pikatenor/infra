@@ -4,7 +4,7 @@ helm:
   repo: https://helm.datadoghq.com
   chart: datadog
   version: 3.167.0
-  values: 
+  values:
     registry: public.ecr.aws/datadog
     fullnameOverride: dd
     datadog:
@@ -24,4 +24,3 @@ helm:
               enabled: true
       clusterName: starlight30
     kubeStateMetricsEnabled: true
- 
