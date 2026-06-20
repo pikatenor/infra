@@ -106,8 +106,17 @@ jobs:
           set -euo pipefail
 
           base_sha="${{ github.event.pull_request.base.sha }}"
+          head_sha="${{ github.event.pull_request.head.sha }}"
           changed_file="changed-files-${{ matrix.cluster }}.txt"
           fleet_summary_file="fleet-bundle-summary-${{ matrix.cluster }}.md"
+
+          is_helm_only_bundle() {
+            local dir="$1"
+            local other_count
+            other_count="$(find "$dir" -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) \
+              ! -name 'fleet.yaml' ! -name 'fleet.yml' | wc -l | tr -d ' ')"
+            [[ "$other_count" -eq 0 ]] && grep -qE '^helm:' "${dir}/fleet.yaml"
+          }
 
           mapfile -t fleet_files < <(grep -E '/fleet\.ya?ml$' "$changed_file" || true)
 
@@ -131,6 +140,26 @@ jobs:
 
             echo "#### ${bundle_dir}" >> "$fleet_summary_file"
 
+            if is_helm_only_bundle "$bundle_dir"; then
+              echo "Helm-only bundle; comparing fleet.yaml (skipping fleet apply chart render)." >> "$fleet_summary_file"
+              set +e
+              diff_output="$(git diff --unified=3 "$base_sha" "$head_sha" -- "$fleet_file" 2>&1)"
+              diff_code=$?
+              set -e
+
+              if [[ $diff_code -eq 0 ]]; then
+                echo "No fleet.yaml changes." >> "$fleet_summary_file"
+              else
+                echo "fleet.yaml changes detected." >> "$fleet_summary_file"
+                echo '```diff' >> "$fleet_summary_file"
+                printf "%s\n" "$diff_output" | head -c 16000 >> "$fleet_summary_file"
+                echo >> "$fleet_summary_file"
+                echo '```' >> "$fleet_summary_file"
+              fi
+              echo >> "$fleet_summary_file"
+              continue
+            fi
+
             mkdir -p "$tmp_root/base"
             mkdir -p "$tmp_root/out"
 
@@ -145,26 +174,26 @@ jobs:
             head_out="$tmp_root/out/head-${safe_name}.yaml"
 
             set +e
-            base_render_output="$(fleet apply --driven-scan -o - "base-${safe_name}" "$tmp_root/base/$bundle_dir" > "$base_out" 2>&1)"
+            fleet apply --driven-scan -o - "base-${safe_name}" "$tmp_root/base/$bundle_dir" > "$base_out" 2>&1
             base_render_code=$?
-            head_render_output="$(fleet apply --driven-scan -o - "head-${safe_name}" "$bundle_dir" > "$head_out" 2>&1)"
+            fleet apply --driven-scan -o - "head-${safe_name}" "$bundle_dir" > "$head_out" 2>&1
             head_render_code=$?
             set -e
 
             if [[ $base_render_code -ne 0 || $head_render_code -ne 0 ]]; then
               had_error="true"
               echo "Fleet render failed." >> "$fleet_summary_file"
-              if [[ -n "$base_render_output" ]]; then
+              if [[ $base_render_code -ne 0 && -s "$base_out" ]]; then
                 echo '```text' >> "$fleet_summary_file"
                 echo "[base]" >> "$fleet_summary_file"
-                printf "%s\n" "$base_render_output" | head -c 8000 >> "$fleet_summary_file"
+                tail -c 8000 "$base_out" >> "$fleet_summary_file"
                 echo >> "$fleet_summary_file"
                 echo '```' >> "$fleet_summary_file"
               fi
-              if [[ -n "$head_render_output" ]]; then
+              if [[ $head_render_code -ne 0 && -s "$head_out" ]]; then
                 echo '```text' >> "$fleet_summary_file"
                 echo "[head]" >> "$fleet_summary_file"
-                printf "%s\n" "$head_render_output" | head -c 8000 >> "$fleet_summary_file"
+                tail -c 8000 "$head_out" >> "$fleet_summary_file"
                 echo >> "$fleet_summary_file"
                 echo '```' >> "$fleet_summary_file"
               fi
