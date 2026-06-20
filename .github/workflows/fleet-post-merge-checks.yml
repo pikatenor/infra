@@ -1,0 +1,179 @@
+name: Fleet Post Merge Checks
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fleet-post-merge-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-fleet-convergence:
+    runs-on: ubuntu-latest
+    env:
+      KUBECONFIG_B64: ${{ secrets.FLEET_KUBECONFIG_B64 }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed YAML files in push
+        id: changed
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          before="${{ github.event.before }}"
+          after="${{ github.sha }}"
+
+          if [[ "$before" == "0000000000000000000000000000000000000000" ]]; then
+            git ls-files '*.yml' '*.yaml' > changed-files.txt
+          else
+            git diff --name-only "$before" "$after" -- '*.yml' '*.yaml' > changed-files.txt
+          fi
+
+          if [[ -s changed-files.txt ]]; then
+            echo "has_files=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_files=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Skip when no YAML changed
+        if: steps.changed.outputs.has_files != 'true'
+        run: |
+          {
+            echo "## Fleet Post Merge Checks"
+            echo
+            echo "No YAML changes in this push."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Setup kubectl
+        if: steps.changed.outputs.has_files == 'true' && env.KUBECONFIG_B64 != ''
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubeconfig
+        if: steps.changed.outputs.has_files == 'true' && env.KUBECONFIG_B64 != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.kube"
+          echo "$KUBECONFIG_B64" | base64 --decode > "$HOME/.kube/config"
+          chmod 600 "$HOME/.kube/config"
+          kubectl config use-context local
+
+      - name: Skip when kubeconfig is not configured
+        if: steps.changed.outputs.has_files == 'true' && env.KUBECONFIG_B64 == ''
+        run: |
+          {
+            echo "## Fleet Post Merge Checks"
+            echo
+            echo "YAML changes detected, but runtime verification was skipped."
+            echo "Set FLEET_KUBECONFIG_B64 secret to enable convergence checks."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Wait for Fleet GitRepo convergence
+        if: steps.changed.outputs.has_files == 'true' && env.KUBECONFIG_B64 != ''
+        shell: bash
+        env:
+          TARGET_SHA: ${{ github.sha }}
+          REPO_NAME: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          repo_https="https://github.com/${REPO_NAME}.git"
+          repo_https_nogit="https://github.com/${REPO_NAME}"
+          repo_ssh="git@github.com:${REPO_NAME}.git"
+          repo_slug_name="${REPO_NAME##*/}"
+
+          mapfile -t gitrepos < <(
+            kubectl get gitrepos.fleet.cattle.io -A -o json | jq -r \
+              --arg r1 "${repo_https}" \
+              --arg r2 "${repo_https_nogit}" \
+              --arg r3 "${repo_ssh}" \
+              --arg n "${repo_slug_name}" '
+                .items[]
+                | select(
+                    ((.spec.repo // "") == $r1)
+                    or ((.spec.repo // "") == $r2)
+                    or ((.spec.repo // "") == $r3)
+                    or ((.metadata.name // "") == $n)
+                  )
+                | "\(.metadata.namespace)/\(.metadata.name)"
+              '
+          )
+
+          if [[ ${#gitrepos[@]} -eq 0 ]]; then
+            {
+              echo "## Fleet Post Merge Checks"
+              echo
+              echo "No matching Fleet GitRepo was found for ${REPO_NAME}."
+              echo "Checked spec.repo against ${repo_https}, ${repo_https_nogit}, ${repo_ssh}."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
+          {
+            echo "## Fleet Post Merge Checks"
+            echo
+            echo "Tracking GitRepos:"
+            for item in "${gitrepos[@]}"; do
+              echo "- ${item}"
+            done
+            echo
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          timeout_sec=900
+          interval_sec=15
+          elapsed=0
+
+          while true; do
+            all_ok="true"
+            status_report=""
+
+            for item in "${gitrepos[@]}"; do
+              ns="${item%/*}"
+              name="${item#*/}"
+
+              obj="$(kubectl -n "$ns" get gitrepo.fleet.cattle.io "$name" -o json)"
+              ready="$(jq -r '[.status.conditions[]? | select(.type=="Ready")][0].status // "Unknown"' <<< "$obj")"
+              commit="$(jq -r '.status.commit // ""' <<< "$obj")"
+
+              commit_ok="true"
+              if [[ -n "$commit" && "$commit" != "$TARGET_SHA" ]]; then
+                commit_ok="false"
+              fi
+
+              if [[ "$ready" != "True" || "$commit_ok" != "true" ]]; then
+                all_ok="false"
+              fi
+
+              status_report+="- ${item}: Ready=${ready}, Commit=${commit:-<empty>}\n"
+            done
+
+            if [[ "$all_ok" == "true" ]]; then
+              {
+                echo "Convergence completed."
+                echo
+                printf "%b" "$status_report"
+              } >> "$GITHUB_STEP_SUMMARY"
+              break
+            fi
+
+            if (( elapsed >= timeout_sec )); then
+              {
+                echo "Convergence timeout after ${timeout_sec}s."
+                echo
+                printf "%b" "$status_report"
+              } >> "$GITHUB_STEP_SUMMARY"
+              exit 1
+            fi
+
+            sleep "$interval_sec"
+            elapsed=$((elapsed + interval_sec))
+          done
