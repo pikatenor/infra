@@ -343,7 +343,7 @@ resource "oci_containerengine_node_pool" "oke25-node-pool" {
         data.oci_identity_fault_domains.fds.fault_domains[1].name,
       ]
     }
-    size = 2
+    size = 1
   }
   node_shape = "VM.Standard.A1.Flex"
   node_shape_config {
