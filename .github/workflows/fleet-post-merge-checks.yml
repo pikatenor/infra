@@ -55,7 +55,7 @@ jobs:
 
       - name: Setup kubectl
         if: steps.changed.outputs.has_files == 'true' && env.KUBECONFIG_B64 != ''
-        uses: azure/setup-kubectl@v4
+        uses: azure/setup-kubectl@v5
 
       - name: Configure kubeconfig
         if: steps.changed.outputs.has_files == 'true' && env.KUBECONFIG_B64 != ''
