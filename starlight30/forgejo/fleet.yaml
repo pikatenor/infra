@@ -2,7 +2,7 @@ defaultNamespace: forgejo
 
 helm:
   chart: oci://code.forgejo.org/forgejo-helm/forgejo
-  version: 14.0.4
+  version: 17.1.1
   values:
     replicaCount: 1
 
@@ -28,8 +28,10 @@ helm:
           DISABLE_ORGANIZATIONS_PAGE: true
           DISABLE_CODE_PAGE: true
       admin:
-        username: pikatenor
-        passwordMode: initialOnlyRequireReset
+        # admin user is not managed by the chart: initial setup + password
+        # reset were done out-of-band. Empty username disables chart-side
+        # admin management (required since forgejo-helm v15).
+        username: ""
 
     service:
       ssh:
