@@ -91,7 +91,7 @@ jobs:
 
       - name: Install Fleet CLI and Helm
         if: steps.changed.outputs.has_files == 'true'
-        uses: azure/setup-helm@v4
+        uses: azure/setup-helm@v5
 
       - name: Install Fleet CLI binary
         if: steps.changed.outputs.has_files == 'true'
