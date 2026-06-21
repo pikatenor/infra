@@ -1,0 +1,83 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: traccar-data
+  namespace: default
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    workload.user.cattle.io/workloadselector: deployment-default-traccar
+  name: traccar
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: deployment-default-traccar
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        workload.user.cattle.io/workloadselector: deployment-default-traccar
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: juno4a
+      containers:
+        - name: traccar
+          # renovate: depName=traccar/traccar
+          image: traccar/traccar:6.12.2
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8082
+              name: http
+              protocol: TCP
+          # GPS tracker protocol ports 5000-5300 are exposed by the
+          # traccar-device-ports LoadBalancer Service (traccar-device-ports.yml).
+          livenessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            tcpSocket:
+              port: 8082
+            timeoutSeconds: 2
+          volumeMounts:
+            - mountPath: /opt/traccar/data
+              name: data
+              subPath: data
+            - mountPath: /opt/traccar/logs
+              name: logs
+          resources: {}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: traccar-data
+        - name: logs
+          emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traccar
+  namespace: default
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+  selector:
+    workload.user.cattle.io/workloadselector: deployment-default-traccar

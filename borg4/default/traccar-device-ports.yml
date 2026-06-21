@@ -1,0 +1,2429 @@
+# GPS tracker protocol ports for Traccar.
+#
+# Mirrors the official Docker guidance:
+#   docker run --publish 5000-5300:5000-5300 --publish 5000-5300:5000-5300/udp
+#
+# metallb (pool 'dii', 192.168.21.151-199, advertised on juno4a) allocates
+# a dedicated LoadBalancer IP; all 5000-5300 ports are exposed on it.
+# externalTrafficPolicy: Local preserves device source IP (pod runs on juno4a,
+# the metallb advertising node, so there is no extra hop).
+# Forward these ports at the network edge to the allocated LB IP for remote trackers.
+apiVersion: v1
+kind: Service
+metadata:
+  name: traccar-device-ports
+  namespace: default
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  selector:
+    workload.user.cattle.io/workloadselector: deployment-default-traccar
+  ports:
+    - name: tcp-5000
+      port: 5000
+      targetPort: 5000
+      protocol: TCP
+    - name: udp-5000
+      port: 5000
+      targetPort: 5000
+      protocol: UDP
+    - name: tcp-5001
+      port: 5001
+      targetPort: 5001
+      protocol: TCP
+    - name: udp-5001
+      port: 5001
+      targetPort: 5001
+      protocol: UDP
+    - name: tcp-5002
+      port: 5002
+      targetPort: 5002
+      protocol: TCP
+    - name: udp-5002
+      port: 5002
+      targetPort: 5002
+      protocol: UDP
+    - name: tcp-5003
+      port: 5003
+      targetPort: 5003
+      protocol: TCP
+    - name: udp-5003
+      port: 5003
+      targetPort: 5003
+      protocol: UDP
+    - name: tcp-5004
+      port: 5004
+      targetPort: 5004
+      protocol: TCP
+    - name: udp-5004
+      port: 5004
+      targetPort: 5004
+      protocol: UDP
+    - name: tcp-5005
+      port: 5005
+      targetPort: 5005
+      protocol: TCP
+    - name: udp-5005
+      port: 5005
+      targetPort: 5005
+      protocol: UDP
+    - name: tcp-5006
+      port: 5006
+      targetPort: 5006
+      protocol: TCP
+    - name: udp-5006
+      port: 5006
+      targetPort: 5006
+      protocol: UDP
+    - name: tcp-5007
+      port: 5007
+      targetPort: 5007
+      protocol: TCP
+    - name: udp-5007
+      port: 5007
+      targetPort: 5007
+      protocol: UDP
+    - name: tcp-5008
+      port: 5008
+      targetPort: 5008
+      protocol: TCP
+    - name: udp-5008
+      port: 5008
+      targetPort: 5008
+      protocol: UDP
+    - name: tcp-5009
+      port: 5009
+      targetPort: 5009
+      protocol: TCP
+    - name: udp-5009
+      port: 5009
+      targetPort: 5009
+      protocol: UDP
+    - name: tcp-5010
+      port: 5010
+      targetPort: 5010
+      protocol: TCP
+    - name: udp-5010
+      port: 5010
+      targetPort: 5010
+      protocol: UDP
+    - name: tcp-5011
+      port: 5011
+      targetPort: 5011
+      protocol: TCP
+    - name: udp-5011
+      port: 5011
+      targetPort: 5011
+      protocol: UDP
+    - name: tcp-5012
+      port: 5012
+      targetPort: 5012
+      protocol: TCP
+    - name: udp-5012
+      port: 5012
+      targetPort: 5012
+      protocol: UDP
+    - name: tcp-5013
+      port: 5013
+      targetPort: 5013
+      protocol: TCP
+    - name: udp-5013
+      port: 5013
+      targetPort: 5013
+      protocol: UDP
+    - name: tcp-5014
+      port: 5014
+      targetPort: 5014
+      protocol: TCP
+    - name: udp-5014
+      port: 5014
+      targetPort: 5014
+      protocol: UDP
+    - name: tcp-5015
+      port: 5015
+      targetPort: 5015
+      protocol: TCP
+    - name: udp-5015
+      port: 5015
+      targetPort: 5015
+      protocol: UDP
+    - name: tcp-5016
+      port: 5016
+      targetPort: 5016
+      protocol: TCP
+    - name: udp-5016
+      port: 5016
+      targetPort: 5016
+      protocol: UDP
+    - name: tcp-5017
+      port: 5017
+      targetPort: 5017
+      protocol: TCP
+    - name: udp-5017
+      port: 5017
+      targetPort: 5017
+      protocol: UDP
+    - name: tcp-5018
+      port: 5018
+      targetPort: 5018
+      protocol: TCP
+    - name: udp-5018
+      port: 5018
+      targetPort: 5018
+      protocol: UDP
+    - name: tcp-5019
+      port: 5019
+      targetPort: 5019
+      protocol: TCP
+    - name: udp-5019
+      port: 5019
+      targetPort: 5019
+      protocol: UDP
+    - name: tcp-5020
+      port: 5020
+      targetPort: 5020
+      protocol: TCP
+    - name: udp-5020
+      port: 5020
+      targetPort: 5020
+      protocol: UDP
+    - name: tcp-5021
+      port: 5021
+      targetPort: 5021
+      protocol: TCP
+    - name: udp-5021
+      port: 5021
+      targetPort: 5021
+      protocol: UDP
+    - name: tcp-5022
+      port: 5022
+      targetPort: 5022
+      protocol: TCP
+    - name: udp-5022
+      port: 5022
+      targetPort: 5022
+      protocol: UDP
+    - name: tcp-5023
+      port: 5023
+      targetPort: 5023
+      protocol: TCP
+    - name: udp-5023
+      port: 5023
+      targetPort: 5023
+      protocol: UDP
+    - name: tcp-5024
+      port: 5024
+      targetPort: 5024
+      protocol: TCP
+    - name: udp-5024
+      port: 5024
+      targetPort: 5024
+      protocol: UDP
+    - name: tcp-5025
+      port: 5025
+      targetPort: 5025
+      protocol: TCP
+    - name: udp-5025
+      port: 5025
+      targetPort: 5025
+      protocol: UDP
+    - name: tcp-5026
+      port: 5026
+      targetPort: 5026
+      protocol: TCP
+    - name: udp-5026
+      port: 5026
+      targetPort: 5026
+      protocol: UDP
+    - name: tcp-5027
+      port: 5027
+      targetPort: 5027
+      protocol: TCP
+    - name: udp-5027
+      port: 5027
+      targetPort: 5027
+      protocol: UDP
+    - name: tcp-5028
+      port: 5028
+      targetPort: 5028
+      protocol: TCP
+    - name: udp-5028
+      port: 5028
+      targetPort: 5028
+      protocol: UDP
+    - name: tcp-5029
+      port: 5029
+      targetPort: 5029
+      protocol: TCP
+    - name: udp-5029
+      port: 5029
+      targetPort: 5029
+      protocol: UDP
+    - name: tcp-5030
+      port: 5030
+      targetPort: 5030
+      protocol: TCP
+    - name: udp-5030
+      port: 5030
+      targetPort: 5030
+      protocol: UDP
+    - name: tcp-5031
+      port: 5031
+      targetPort: 5031
+      protocol: TCP
+    - name: udp-5031
+      port: 5031
+      targetPort: 5031
+      protocol: UDP
+    - name: tcp-5032
+      port: 5032
+      targetPort: 5032
+      protocol: TCP
+    - name: udp-5032
+      port: 5032
+      targetPort: 5032
+      protocol: UDP
+    - name: tcp-5033
+      port: 5033
+      targetPort: 5033
+      protocol: TCP
+    - name: udp-5033
+      port: 5033
+      targetPort: 5033
+      protocol: UDP
+    - name: tcp-5034
+      port: 5034
+      targetPort: 5034
+      protocol: TCP
+    - name: udp-5034
+      port: 5034
+      targetPort: 5034
+      protocol: UDP
+    - name: tcp-5035
+      port: 5035
+      targetPort: 5035
+      protocol: TCP
+    - name: udp-5035
+      port: 5035
+      targetPort: 5035
+      protocol: UDP
+    - name: tcp-5036
+      port: 5036
+      targetPort: 5036
+      protocol: TCP
+    - name: udp-5036
+      port: 5036
+      targetPort: 5036
+      protocol: UDP
+    - name: tcp-5037
+      port: 5037
+      targetPort: 5037
+      protocol: TCP
+    - name: udp-5037
+      port: 5037
+      targetPort: 5037
+      protocol: UDP
+    - name: tcp-5038
+      port: 5038
+      targetPort: 5038
+      protocol: TCP
+    - name: udp-5038
+      port: 5038
+      targetPort: 5038
+      protocol: UDP
+    - name: tcp-5039
+      port: 5039
+      targetPort: 5039
+      protocol: TCP
+    - name: udp-5039
+      port: 5039
+      targetPort: 5039
+      protocol: UDP
+    - name: tcp-5040
+      port: 5040
+      targetPort: 5040
+      protocol: TCP
+    - name: udp-5040
+      port: 5040
+      targetPort: 5040
+      protocol: UDP
+    - name: tcp-5041
+      port: 5041
+      targetPort: 5041
+      protocol: TCP
+    - name: udp-5041
+      port: 5041
+      targetPort: 5041
+      protocol: UDP
+    - name: tcp-5042
+      port: 5042
+      targetPort: 5042
+      protocol: TCP
+    - name: udp-5042
+      port: 5042
+      targetPort: 5042
+      protocol: UDP
+    - name: tcp-5043
+      port: 5043
+      targetPort: 5043
+      protocol: TCP
+    - name: udp-5043
+      port: 5043
+      targetPort: 5043
+      protocol: UDP
+    - name: tcp-5044
+      port: 5044
+      targetPort: 5044
+      protocol: TCP
+    - name: udp-5044
+      port: 5044
+      targetPort: 5044
+      protocol: UDP
+    - name: tcp-5045
+      port: 5045
+      targetPort: 5045
+      protocol: TCP
+    - name: udp-5045
+      port: 5045
+      targetPort: 5045
+      protocol: UDP
+    - name: tcp-5046
+      port: 5046
+      targetPort: 5046
+      protocol: TCP
+    - name: udp-5046
+      port: 5046
+      targetPort: 5046
+      protocol: UDP
+    - name: tcp-5047
+      port: 5047
+      targetPort: 5047
+      protocol: TCP
+    - name: udp-5047
+      port: 5047
+      targetPort: 5047
+      protocol: UDP
+    - name: tcp-5048
+      port: 5048
+      targetPort: 5048
+      protocol: TCP
+    - name: udp-5048
+      port: 5048
+      targetPort: 5048
+      protocol: UDP
+    - name: tcp-5049
+      port: 5049
+      targetPort: 5049
+      protocol: TCP
+    - name: udp-5049
+      port: 5049
+      targetPort: 5049
+      protocol: UDP
+    - name: tcp-5050
+      port: 5050
+      targetPort: 5050
+      protocol: TCP
+    - name: udp-5050
+      port: 5050
+      targetPort: 5050
+      protocol: UDP
+    - name: tcp-5051
+      port: 5051
+      targetPort: 5051
+      protocol: TCP
+    - name: udp-5051
+      port: 5051
+      targetPort: 5051
+      protocol: UDP
+    - name: tcp-5052
+      port: 5052
+      targetPort: 5052
+      protocol: TCP
+    - name: udp-5052
+      port: 5052
+      targetPort: 5052
+      protocol: UDP
+    - name: tcp-5053
+      port: 5053
+      targetPort: 5053
+      protocol: TCP
+    - name: udp-5053
+      port: 5053
+      targetPort: 5053
+      protocol: UDP
+    - name: tcp-5054
+      port: 5054
+      targetPort: 5054
+      protocol: TCP
+    - name: udp-5054
+      port: 5054
+      targetPort: 5054
+      protocol: UDP
+    - name: tcp-5055
+      port: 5055
+      targetPort: 5055
+      protocol: TCP
+    - name: udp-5055
+      port: 5055
+      targetPort: 5055
+      protocol: UDP
+    - name: tcp-5056
+      port: 5056
+      targetPort: 5056
+      protocol: TCP
+    - name: udp-5056
+      port: 5056
+      targetPort: 5056
+      protocol: UDP
+    - name: tcp-5057
+      port: 5057
+      targetPort: 5057
+      protocol: TCP
+    - name: udp-5057
+      port: 5057
+      targetPort: 5057
+      protocol: UDP
+    - name: tcp-5058
+      port: 5058
+      targetPort: 5058
+      protocol: TCP
+    - name: udp-5058
+      port: 5058
+      targetPort: 5058
+      protocol: UDP
+    - name: tcp-5059
+      port: 5059
+      targetPort: 5059
+      protocol: TCP
+    - name: udp-5059
+      port: 5059
+      targetPort: 5059
+      protocol: UDP
+    - name: tcp-5060
+      port: 5060
+      targetPort: 5060
+      protocol: TCP
+    - name: udp-5060
+      port: 5060
+      targetPort: 5060
+      protocol: UDP
+    - name: tcp-5061
+      port: 5061
+      targetPort: 5061
+      protocol: TCP
+    - name: udp-5061
+      port: 5061
+      targetPort: 5061
+      protocol: UDP
+    - name: tcp-5062
+      port: 5062
+      targetPort: 5062
+      protocol: TCP
+    - name: udp-5062
+      port: 5062
+      targetPort: 5062
+      protocol: UDP
+    - name: tcp-5063
+      port: 5063
+      targetPort: 5063
+      protocol: TCP
+    - name: udp-5063
+      port: 5063
+      targetPort: 5063
+      protocol: UDP
+    - name: tcp-5064
+      port: 5064
+      targetPort: 5064
+      protocol: TCP
+    - name: udp-5064
+      port: 5064
+      targetPort: 5064
+      protocol: UDP
+    - name: tcp-5065
+      port: 5065
+      targetPort: 5065
+      protocol: TCP
+    - name: udp-5065
+      port: 5065
+      targetPort: 5065
+      protocol: UDP
+    - name: tcp-5066
+      port: 5066
+      targetPort: 5066
+      protocol: TCP
+    - name: udp-5066
+      port: 5066
+      targetPort: 5066
+      protocol: UDP
+    - name: tcp-5067
+      port: 5067
+      targetPort: 5067
+      protocol: TCP
+    - name: udp-5067
+      port: 5067
+      targetPort: 5067
+      protocol: UDP
+    - name: tcp-5068
+      port: 5068
+      targetPort: 5068
+      protocol: TCP
+    - name: udp-5068
+      port: 5068
+      targetPort: 5068
+      protocol: UDP
+    - name: tcp-5069
+      port: 5069
+      targetPort: 5069
+      protocol: TCP
+    - name: udp-5069
+      port: 5069
+      targetPort: 5069
+      protocol: UDP
+    - name: tcp-5070
+      port: 5070
+      targetPort: 5070
+      protocol: TCP
+    - name: udp-5070
+      port: 5070
+      targetPort: 5070
+      protocol: UDP
+    - name: tcp-5071
+      port: 5071
+      targetPort: 5071
+      protocol: TCP
+    - name: udp-5071
+      port: 5071
+      targetPort: 5071
+      protocol: UDP
+    - name: tcp-5072
+      port: 5072
+      targetPort: 5072
+      protocol: TCP
+    - name: udp-5072
+      port: 5072
+      targetPort: 5072
+      protocol: UDP
+    - name: tcp-5073
+      port: 5073
+      targetPort: 5073
+      protocol: TCP
+    - name: udp-5073
+      port: 5073
+      targetPort: 5073
+      protocol: UDP
+    - name: tcp-5074
+      port: 5074
+      targetPort: 5074
+      protocol: TCP
+    - name: udp-5074
+      port: 5074
+      targetPort: 5074
+      protocol: UDP
+    - name: tcp-5075
+      port: 5075
+      targetPort: 5075
+      protocol: TCP
+    - name: udp-5075
+      port: 5075
+      targetPort: 5075
+      protocol: UDP
+    - name: tcp-5076
+      port: 5076
+      targetPort: 5076
+      protocol: TCP
+    - name: udp-5076
+      port: 5076
+      targetPort: 5076
+      protocol: UDP
+    - name: tcp-5077
+      port: 5077
+      targetPort: 5077
+      protocol: TCP
+    - name: udp-5077
+      port: 5077
+      targetPort: 5077
+      protocol: UDP
+    - name: tcp-5078
+      port: 5078
+      targetPort: 5078
+      protocol: TCP
+    - name: udp-5078
+      port: 5078
+      targetPort: 5078
+      protocol: UDP
+    - name: tcp-5079
+      port: 5079
+      targetPort: 5079
+      protocol: TCP
+    - name: udp-5079
+      port: 5079
+      targetPort: 5079
+      protocol: UDP
+    - name: tcp-5080
+      port: 5080
+      targetPort: 5080
+      protocol: TCP
+    - name: udp-5080
+      port: 5080
+      targetPort: 5080
+      protocol: UDP
+    - name: tcp-5081
+      port: 5081
+      targetPort: 5081
+      protocol: TCP
+    - name: udp-5081
+      port: 5081
+      targetPort: 5081
+      protocol: UDP
+    - name: tcp-5082
+      port: 5082
+      targetPort: 5082
+      protocol: TCP
+    - name: udp-5082
+      port: 5082
+      targetPort: 5082
+      protocol: UDP
+    - name: tcp-5083
+      port: 5083
+      targetPort: 5083
+      protocol: TCP
+    - name: udp-5083
+      port: 5083
+      targetPort: 5083
+      protocol: UDP
+    - name: tcp-5084
+      port: 5084
+      targetPort: 5084
+      protocol: TCP
+    - name: udp-5084
+      port: 5084
+      targetPort: 5084
+      protocol: UDP
+    - name: tcp-5085
+      port: 5085
+      targetPort: 5085
+      protocol: TCP
+    - name: udp-5085
+      port: 5085
+      targetPort: 5085
+      protocol: UDP
+    - name: tcp-5086
+      port: 5086
+      targetPort: 5086
+      protocol: TCP
+    - name: udp-5086
+      port: 5086
+      targetPort: 5086
+      protocol: UDP
+    - name: tcp-5087
+      port: 5087
+      targetPort: 5087
+      protocol: TCP
+    - name: udp-5087
+      port: 5087
+      targetPort: 5087
+      protocol: UDP
+    - name: tcp-5088
+      port: 5088
+      targetPort: 5088
+      protocol: TCP
+    - name: udp-5088
+      port: 5088
+      targetPort: 5088
+      protocol: UDP
+    - name: tcp-5089
+      port: 5089
+      targetPort: 5089
+      protocol: TCP
+    - name: udp-5089
+      port: 5089
+      targetPort: 5089
+      protocol: UDP
+    - name: tcp-5090
+      port: 5090
+      targetPort: 5090
+      protocol: TCP
+    - name: udp-5090
+      port: 5090
+      targetPort: 5090
+      protocol: UDP
+    - name: tcp-5091
+      port: 5091
+      targetPort: 5091
+      protocol: TCP
+    - name: udp-5091
+      port: 5091
+      targetPort: 5091
+      protocol: UDP
+    - name: tcp-5092
+      port: 5092
+      targetPort: 5092
+      protocol: TCP
+    - name: udp-5092
+      port: 5092
+      targetPort: 5092
+      protocol: UDP
+    - name: tcp-5093
+      port: 5093
+      targetPort: 5093
+      protocol: TCP
+    - name: udp-5093
+      port: 5093
+      targetPort: 5093
+      protocol: UDP
+    - name: tcp-5094
+      port: 5094
+      targetPort: 5094
+      protocol: TCP
+    - name: udp-5094
+      port: 5094
+      targetPort: 5094
+      protocol: UDP
+    - name: tcp-5095
+      port: 5095
+      targetPort: 5095
+      protocol: TCP
+    - name: udp-5095
+      port: 5095
+      targetPort: 5095
+      protocol: UDP
+    - name: tcp-5096
+      port: 5096
+      targetPort: 5096
+      protocol: TCP
+    - name: udp-5096
+      port: 5096
+      targetPort: 5096
+      protocol: UDP
+    - name: tcp-5097
+      port: 5097
+      targetPort: 5097
+      protocol: TCP
+    - name: udp-5097
+      port: 5097
+      targetPort: 5097
+      protocol: UDP
+    - name: tcp-5098
+      port: 5098
+      targetPort: 5098
+      protocol: TCP
+    - name: udp-5098
+      port: 5098
+      targetPort: 5098
+      protocol: UDP
+    - name: tcp-5099
+      port: 5099
+      targetPort: 5099
+      protocol: TCP
+    - name: udp-5099
+      port: 5099
+      targetPort: 5099
+      protocol: UDP
+    - name: tcp-5100
+      port: 5100
+      targetPort: 5100
+      protocol: TCP
+    - name: udp-5100
+      port: 5100
+      targetPort: 5100
+      protocol: UDP
+    - name: tcp-5101
+      port: 5101
+      targetPort: 5101
+      protocol: TCP
+    - name: udp-5101
+      port: 5101
+      targetPort: 5101
+      protocol: UDP
+    - name: tcp-5102
+      port: 5102
+      targetPort: 5102
+      protocol: TCP
+    - name: udp-5102
+      port: 5102
+      targetPort: 5102
+      protocol: UDP
+    - name: tcp-5103
+      port: 5103
+      targetPort: 5103
+      protocol: TCP
+    - name: udp-5103
+      port: 5103
+      targetPort: 5103
+      protocol: UDP
+    - name: tcp-5104
+      port: 5104
+      targetPort: 5104
+      protocol: TCP
+    - name: udp-5104
+      port: 5104
+      targetPort: 5104
+      protocol: UDP
+    - name: tcp-5105
+      port: 5105
+      targetPort: 5105
+      protocol: TCP
+    - name: udp-5105
+      port: 5105
+      targetPort: 5105
+      protocol: UDP
+    - name: tcp-5106
+      port: 5106
+      targetPort: 5106
+      protocol: TCP
+    - name: udp-5106
+      port: 5106
+      targetPort: 5106
+      protocol: UDP
+    - name: tcp-5107
+      port: 5107
+      targetPort: 5107
+      protocol: TCP
+    - name: udp-5107
+      port: 5107
+      targetPort: 5107
+      protocol: UDP
+    - name: tcp-5108
+      port: 5108
+      targetPort: 5108
+      protocol: TCP
+    - name: udp-5108
+      port: 5108
+      targetPort: 5108
+      protocol: UDP
+    - name: tcp-5109
+      port: 5109
+      targetPort: 5109
+      protocol: TCP
+    - name: udp-5109
+      port: 5109
+      targetPort: 5109
+      protocol: UDP
+    - name: tcp-5110
+      port: 5110
+      targetPort: 5110
+      protocol: TCP
+    - name: udp-5110
+      port: 5110
+      targetPort: 5110
+      protocol: UDP
+    - name: tcp-5111
+      port: 5111
+      targetPort: 5111
+      protocol: TCP
+    - name: udp-5111
+      port: 5111
+      targetPort: 5111
+      protocol: UDP
+    - name: tcp-5112
+      port: 5112
+      targetPort: 5112
+      protocol: TCP
+    - name: udp-5112
+      port: 5112
+      targetPort: 5112
+      protocol: UDP
+    - name: tcp-5113
+      port: 5113
+      targetPort: 5113
+      protocol: TCP
+    - name: udp-5113
+      port: 5113
+      targetPort: 5113
+      protocol: UDP
+    - name: tcp-5114
+      port: 5114
+      targetPort: 5114
+      protocol: TCP
+    - name: udp-5114
+      port: 5114
+      targetPort: 5114
+      protocol: UDP
+    - name: tcp-5115
+      port: 5115
+      targetPort: 5115
+      protocol: TCP
+    - name: udp-5115
+      port: 5115
+      targetPort: 5115
+      protocol: UDP
+    - name: tcp-5116
+      port: 5116
+      targetPort: 5116
+      protocol: TCP
+    - name: udp-5116
+      port: 5116
+      targetPort: 5116
+      protocol: UDP
+    - name: tcp-5117
+      port: 5117
+      targetPort: 5117
+      protocol: TCP
+    - name: udp-5117
+      port: 5117
+      targetPort: 5117
+      protocol: UDP
+    - name: tcp-5118
+      port: 5118
+      targetPort: 5118
+      protocol: TCP
+    - name: udp-5118
+      port: 5118
+      targetPort: 5118
+      protocol: UDP
+    - name: tcp-5119
+      port: 5119
+      targetPort: 5119
+      protocol: TCP
+    - name: udp-5119
+      port: 5119
+      targetPort: 5119
+      protocol: UDP
+    - name: tcp-5120
+      port: 5120
+      targetPort: 5120
+      protocol: TCP
+    - name: udp-5120
+      port: 5120
+      targetPort: 5120
+      protocol: UDP
+    - name: tcp-5121
+      port: 5121
+      targetPort: 5121
+      protocol: TCP
+    - name: udp-5121
+      port: 5121
+      targetPort: 5121
+      protocol: UDP
+    - name: tcp-5122
+      port: 5122
+      targetPort: 5122
+      protocol: TCP
+    - name: udp-5122
+      port: 5122
+      targetPort: 5122
+      protocol: UDP
+    - name: tcp-5123
+      port: 5123
+      targetPort: 5123
+      protocol: TCP
+    - name: udp-5123
+      port: 5123
+      targetPort: 5123
+      protocol: UDP
+    - name: tcp-5124
+      port: 5124
+      targetPort: 5124
+      protocol: TCP
+    - name: udp-5124
+      port: 5124
+      targetPort: 5124
+      protocol: UDP
+    - name: tcp-5125
+      port: 5125
+      targetPort: 5125
+      protocol: TCP
+    - name: udp-5125
+      port: 5125
+      targetPort: 5125
+      protocol: UDP
+    - name: tcp-5126
+      port: 5126
+      targetPort: 5126
+      protocol: TCP
+    - name: udp-5126
+      port: 5126
+      targetPort: 5126
+      protocol: UDP
+    - name: tcp-5127
+      port: 5127
+      targetPort: 5127
+      protocol: TCP
+    - name: udp-5127
+      port: 5127
+      targetPort: 5127
+      protocol: UDP
+    - name: tcp-5128
+      port: 5128
+      targetPort: 5128
+      protocol: TCP
+    - name: udp-5128
+      port: 5128
+      targetPort: 5128
+      protocol: UDP
+    - name: tcp-5129
+      port: 5129
+      targetPort: 5129
+      protocol: TCP
+    - name: udp-5129
+      port: 5129
+      targetPort: 5129
+      protocol: UDP
+    - name: tcp-5130
+      port: 5130
+      targetPort: 5130
+      protocol: TCP
+    - name: udp-5130
+      port: 5130
+      targetPort: 5130
+      protocol: UDP
+    - name: tcp-5131
+      port: 5131
+      targetPort: 5131
+      protocol: TCP
+    - name: udp-5131
+      port: 5131
+      targetPort: 5131
+      protocol: UDP
+    - name: tcp-5132
+      port: 5132
+      targetPort: 5132
+      protocol: TCP
+    - name: udp-5132
+      port: 5132
+      targetPort: 5132
+      protocol: UDP
+    - name: tcp-5133
+      port: 5133
+      targetPort: 5133
+      protocol: TCP
+    - name: udp-5133
+      port: 5133
+      targetPort: 5133
+      protocol: UDP
+    - name: tcp-5134
+      port: 5134
+      targetPort: 5134
+      protocol: TCP
+    - name: udp-5134
+      port: 5134
+      targetPort: 5134
+      protocol: UDP
+    - name: tcp-5135
+      port: 5135
+      targetPort: 5135
+      protocol: TCP
+    - name: udp-5135
+      port: 5135
+      targetPort: 5135
+      protocol: UDP
+    - name: tcp-5136
+      port: 5136
+      targetPort: 5136
+      protocol: TCP
+    - name: udp-5136
+      port: 5136
+      targetPort: 5136
+      protocol: UDP
+    - name: tcp-5137
+      port: 5137
+      targetPort: 5137
+      protocol: TCP
+    - name: udp-5137
+      port: 5137
+      targetPort: 5137
+      protocol: UDP
+    - name: tcp-5138
+      port: 5138
+      targetPort: 5138
+      protocol: TCP
+    - name: udp-5138
+      port: 5138
+      targetPort: 5138
+      protocol: UDP
+    - name: tcp-5139
+      port: 5139
+      targetPort: 5139
+      protocol: TCP
+    - name: udp-5139
+      port: 5139
+      targetPort: 5139
+      protocol: UDP
+    - name: tcp-5140
+      port: 5140
+      targetPort: 5140
+      protocol: TCP
+    - name: udp-5140
+      port: 5140
+      targetPort: 5140
+      protocol: UDP
+    - name: tcp-5141
+      port: 5141
+      targetPort: 5141
+      protocol: TCP
+    - name: udp-5141
+      port: 5141
+      targetPort: 5141
+      protocol: UDP
+    - name: tcp-5142
+      port: 5142
+      targetPort: 5142
+      protocol: TCP
+    - name: udp-5142
+      port: 5142
+      targetPort: 5142
+      protocol: UDP
+    - name: tcp-5143
+      port: 5143
+      targetPort: 5143
+      protocol: TCP
+    - name: udp-5143
+      port: 5143
+      targetPort: 5143
+      protocol: UDP
+    - name: tcp-5144
+      port: 5144
+      targetPort: 5144
+      protocol: TCP
+    - name: udp-5144
+      port: 5144
+      targetPort: 5144
+      protocol: UDP
+    - name: tcp-5145
+      port: 5145
+      targetPort: 5145
+      protocol: TCP
+    - name: udp-5145
+      port: 5145
+      targetPort: 5145
+      protocol: UDP
+    - name: tcp-5146
+      port: 5146
+      targetPort: 5146
+      protocol: TCP
+    - name: udp-5146
+      port: 5146
+      targetPort: 5146
+      protocol: UDP
+    - name: tcp-5147
+      port: 5147
+      targetPort: 5147
+      protocol: TCP
+    - name: udp-5147
+      port: 5147
+      targetPort: 5147
+      protocol: UDP
+    - name: tcp-5148
+      port: 5148
+      targetPort: 5148
+      protocol: TCP
+    - name: udp-5148
+      port: 5148
+      targetPort: 5148
+      protocol: UDP
+    - name: tcp-5149
+      port: 5149
+      targetPort: 5149
+      protocol: TCP
+    - name: udp-5149
+      port: 5149
+      targetPort: 5149
+      protocol: UDP
+    - name: tcp-5150
+      port: 5150
+      targetPort: 5150
+      protocol: TCP
+    - name: udp-5150
+      port: 5150
+      targetPort: 5150
+      protocol: UDP
+    - name: tcp-5151
+      port: 5151
+      targetPort: 5151
+      protocol: TCP
+    - name: udp-5151
+      port: 5151
+      targetPort: 5151
+      protocol: UDP
+    - name: tcp-5152
+      port: 5152
+      targetPort: 5152
+      protocol: TCP
+    - name: udp-5152
+      port: 5152
+      targetPort: 5152
+      protocol: UDP
+    - name: tcp-5153
+      port: 5153
+      targetPort: 5153
+      protocol: TCP
+    - name: udp-5153
+      port: 5153
+      targetPort: 5153
+      protocol: UDP
+    - name: tcp-5154
+      port: 5154
+      targetPort: 5154
+      protocol: TCP
+    - name: udp-5154
+      port: 5154
+      targetPort: 5154
+      protocol: UDP
+    - name: tcp-5155
+      port: 5155
+      targetPort: 5155
+      protocol: TCP
+    - name: udp-5155
+      port: 5155
+      targetPort: 5155
+      protocol: UDP
+    - name: tcp-5156
+      port: 5156
+      targetPort: 5156
+      protocol: TCP
+    - name: udp-5156
+      port: 5156
+      targetPort: 5156
+      protocol: UDP
+    - name: tcp-5157
+      port: 5157
+      targetPort: 5157
+      protocol: TCP
+    - name: udp-5157
+      port: 5157
+      targetPort: 5157
+      protocol: UDP
+    - name: tcp-5158
+      port: 5158
+      targetPort: 5158
+      protocol: TCP
+    - name: udp-5158
+      port: 5158
+      targetPort: 5158
+      protocol: UDP
+    - name: tcp-5159
+      port: 5159
+      targetPort: 5159
+      protocol: TCP
+    - name: udp-5159
+      port: 5159
+      targetPort: 5159
+      protocol: UDP
+    - name: tcp-5160
+      port: 5160
+      targetPort: 5160
+      protocol: TCP
+    - name: udp-5160
+      port: 5160
+      targetPort: 5160
+      protocol: UDP
+    - name: tcp-5161
+      port: 5161
+      targetPort: 5161
+      protocol: TCP
+    - name: udp-5161
+      port: 5161
+      targetPort: 5161
+      protocol: UDP
+    - name: tcp-5162
+      port: 5162
+      targetPort: 5162
+      protocol: TCP
+    - name: udp-5162
+      port: 5162
+      targetPort: 5162
+      protocol: UDP
+    - name: tcp-5163
+      port: 5163
+      targetPort: 5163
+      protocol: TCP
+    - name: udp-5163
+      port: 5163
+      targetPort: 5163
+      protocol: UDP
+    - name: tcp-5164
+      port: 5164
+      targetPort: 5164
+      protocol: TCP
+    - name: udp-5164
+      port: 5164
+      targetPort: 5164
+      protocol: UDP
+    - name: tcp-5165
+      port: 5165
+      targetPort: 5165
+      protocol: TCP
+    - name: udp-5165
+      port: 5165
+      targetPort: 5165
+      protocol: UDP
+    - name: tcp-5166
+      port: 5166
+      targetPort: 5166
+      protocol: TCP
+    - name: udp-5166
+      port: 5166
+      targetPort: 5166
+      protocol: UDP
+    - name: tcp-5167
+      port: 5167
+      targetPort: 5167
+      protocol: TCP
+    - name: udp-5167
+      port: 5167
+      targetPort: 5167
+      protocol: UDP
+    - name: tcp-5168
+      port: 5168
+      targetPort: 5168
+      protocol: TCP
+    - name: udp-5168
+      port: 5168
+      targetPort: 5168
+      protocol: UDP
+    - name: tcp-5169
+      port: 5169
+      targetPort: 5169
+      protocol: TCP
+    - name: udp-5169
+      port: 5169
+      targetPort: 5169
+      protocol: UDP
+    - name: tcp-5170
+      port: 5170
+      targetPort: 5170
+      protocol: TCP
+    - name: udp-5170
+      port: 5170
+      targetPort: 5170
+      protocol: UDP
+    - name: tcp-5171
+      port: 5171
+      targetPort: 5171
+      protocol: TCP
+    - name: udp-5171
+      port: 5171
+      targetPort: 5171
+      protocol: UDP
+    - name: tcp-5172
+      port: 5172
+      targetPort: 5172
+      protocol: TCP
+    - name: udp-5172
+      port: 5172
+      targetPort: 5172
+      protocol: UDP
+    - name: tcp-5173
+      port: 5173
+      targetPort: 5173
+      protocol: TCP
+    - name: udp-5173
+      port: 5173
+      targetPort: 5173
+      protocol: UDP
+    - name: tcp-5174
+      port: 5174
+      targetPort: 5174
+      protocol: TCP
+    - name: udp-5174
+      port: 5174
+      targetPort: 5174
+      protocol: UDP
+    - name: tcp-5175
+      port: 5175
+      targetPort: 5175
+      protocol: TCP
+    - name: udp-5175
+      port: 5175
+      targetPort: 5175
+      protocol: UDP
+    - name: tcp-5176
+      port: 5176
+      targetPort: 5176
+      protocol: TCP
+    - name: udp-5176
+      port: 5176
+      targetPort: 5176
+      protocol: UDP
+    - name: tcp-5177
+      port: 5177
+      targetPort: 5177
+      protocol: TCP
+    - name: udp-5177
+      port: 5177
+      targetPort: 5177
+      protocol: UDP
+    - name: tcp-5178
+      port: 5178
+      targetPort: 5178
+      protocol: TCP
+    - name: udp-5178
+      port: 5178
+      targetPort: 5178
+      protocol: UDP
+    - name: tcp-5179
+      port: 5179
+      targetPort: 5179
+      protocol: TCP
+    - name: udp-5179
+      port: 5179
+      targetPort: 5179
+      protocol: UDP
+    - name: tcp-5180
+      port: 5180
+      targetPort: 5180
+      protocol: TCP
+    - name: udp-5180
+      port: 5180
+      targetPort: 5180
+      protocol: UDP
+    - name: tcp-5181
+      port: 5181
+      targetPort: 5181
+      protocol: TCP
+    - name: udp-5181
+      port: 5181
+      targetPort: 5181
+      protocol: UDP
+    - name: tcp-5182
+      port: 5182
+      targetPort: 5182
+      protocol: TCP
+    - name: udp-5182
+      port: 5182
+      targetPort: 5182
+      protocol: UDP
+    - name: tcp-5183
+      port: 5183
+      targetPort: 5183
+      protocol: TCP
+    - name: udp-5183
+      port: 5183
+      targetPort: 5183
+      protocol: UDP
+    - name: tcp-5184
+      port: 5184
+      targetPort: 5184
+      protocol: TCP
+    - name: udp-5184
+      port: 5184
+      targetPort: 5184
+      protocol: UDP
+    - name: tcp-5185
+      port: 5185
+      targetPort: 5185
+      protocol: TCP
+    - name: udp-5185
+      port: 5185
+      targetPort: 5185
+      protocol: UDP
+    - name: tcp-5186
+      port: 5186
+      targetPort: 5186
+      protocol: TCP
+    - name: udp-5186
+      port: 5186
+      targetPort: 5186
+      protocol: UDP
+    - name: tcp-5187
+      port: 5187
+      targetPort: 5187
+      protocol: TCP
+    - name: udp-5187
+      port: 5187
+      targetPort: 5187
+      protocol: UDP
+    - name: tcp-5188
+      port: 5188
+      targetPort: 5188
+      protocol: TCP
+    - name: udp-5188
+      port: 5188
+      targetPort: 5188
+      protocol: UDP
+    - name: tcp-5189
+      port: 5189
+      targetPort: 5189
+      protocol: TCP
+    - name: udp-5189
+      port: 5189
+      targetPort: 5189
+      protocol: UDP
+    - name: tcp-5190
+      port: 5190
+      targetPort: 5190
+      protocol: TCP
+    - name: udp-5190
+      port: 5190
+      targetPort: 5190
+      protocol: UDP
+    - name: tcp-5191
+      port: 5191
+      targetPort: 5191
+      protocol: TCP
+    - name: udp-5191
+      port: 5191
+      targetPort: 5191
+      protocol: UDP
+    - name: tcp-5192
+      port: 5192
+      targetPort: 5192
+      protocol: TCP
+    - name: udp-5192
+      port: 5192
+      targetPort: 5192
+      protocol: UDP
+    - name: tcp-5193
+      port: 5193
+      targetPort: 5193
+      protocol: TCP
+    - name: udp-5193
+      port: 5193
+      targetPort: 5193
+      protocol: UDP
+    - name: tcp-5194
+      port: 5194
+      targetPort: 5194
+      protocol: TCP
+    - name: udp-5194
+      port: 5194
+      targetPort: 5194
+      protocol: UDP
+    - name: tcp-5195
+      port: 5195
+      targetPort: 5195
+      protocol: TCP
+    - name: udp-5195
+      port: 5195
+      targetPort: 5195
+      protocol: UDP
+    - name: tcp-5196
+      port: 5196
+      targetPort: 5196
+      protocol: TCP
+    - name: udp-5196
+      port: 5196
+      targetPort: 5196
+      protocol: UDP
+    - name: tcp-5197
+      port: 5197
+      targetPort: 5197
+      protocol: TCP
+    - name: udp-5197
+      port: 5197
+      targetPort: 5197
+      protocol: UDP
+    - name: tcp-5198
+      port: 5198
+      targetPort: 5198
+      protocol: TCP
+    - name: udp-5198
+      port: 5198
+      targetPort: 5198
+      protocol: UDP
+    - name: tcp-5199
+      port: 5199
+      targetPort: 5199
+      protocol: TCP
+    - name: udp-5199
+      port: 5199
+      targetPort: 5199
+      protocol: UDP
+    - name: tcp-5200
+      port: 5200
+      targetPort: 5200
+      protocol: TCP
+    - name: udp-5200
+      port: 5200
+      targetPort: 5200
+      protocol: UDP
+    - name: tcp-5201
+      port: 5201
+      targetPort: 5201
+      protocol: TCP
+    - name: udp-5201
+      port: 5201
+      targetPort: 5201
+      protocol: UDP
+    - name: tcp-5202
+      port: 5202
+      targetPort: 5202
+      protocol: TCP
+    - name: udp-5202
+      port: 5202
+      targetPort: 5202
+      protocol: UDP
+    - name: tcp-5203
+      port: 5203
+      targetPort: 5203
+      protocol: TCP
+    - name: udp-5203
+      port: 5203
+      targetPort: 5203
+      protocol: UDP
+    - name: tcp-5204
+      port: 5204
+      targetPort: 5204
+      protocol: TCP
+    - name: udp-5204
+      port: 5204
+      targetPort: 5204
+      protocol: UDP
+    - name: tcp-5205
+      port: 5205
+      targetPort: 5205
+      protocol: TCP
+    - name: udp-5205
+      port: 5205
+      targetPort: 5205
+      protocol: UDP
+    - name: tcp-5206
+      port: 5206
+      targetPort: 5206
+      protocol: TCP
+    - name: udp-5206
+      port: 5206
+      targetPort: 5206
+      protocol: UDP
+    - name: tcp-5207
+      port: 5207
+      targetPort: 5207
+      protocol: TCP
+    - name: udp-5207
+      port: 5207
+      targetPort: 5207
+      protocol: UDP
+    - name: tcp-5208
+      port: 5208
+      targetPort: 5208
+      protocol: TCP
+    - name: udp-5208
+      port: 5208
+      targetPort: 5208
+      protocol: UDP
+    - name: tcp-5209
+      port: 5209
+      targetPort: 5209
+      protocol: TCP
+    - name: udp-5209
+      port: 5209
+      targetPort: 5209
+      protocol: UDP
+    - name: tcp-5210
+      port: 5210
+      targetPort: 5210
+      protocol: TCP
+    - name: udp-5210
+      port: 5210
+      targetPort: 5210
+      protocol: UDP
+    - name: tcp-5211
+      port: 5211
+      targetPort: 5211
+      protocol: TCP
+    - name: udp-5211
+      port: 5211
+      targetPort: 5211
+      protocol: UDP
+    - name: tcp-5212
+      port: 5212
+      targetPort: 5212
+      protocol: TCP
+    - name: udp-5212
+      port: 5212
+      targetPort: 5212
+      protocol: UDP
+    - name: tcp-5213
+      port: 5213
+      targetPort: 5213
+      protocol: TCP
+    - name: udp-5213
+      port: 5213
+      targetPort: 5213
+      protocol: UDP
+    - name: tcp-5214
+      port: 5214
+      targetPort: 5214
+      protocol: TCP
+    - name: udp-5214
+      port: 5214
+      targetPort: 5214
+      protocol: UDP
+    - name: tcp-5215
+      port: 5215
+      targetPort: 5215
+      protocol: TCP
+    - name: udp-5215
+      port: 5215
+      targetPort: 5215
+      protocol: UDP
+    - name: tcp-5216
+      port: 5216
+      targetPort: 5216
+      protocol: TCP
+    - name: udp-5216
+      port: 5216
+      targetPort: 5216
+      protocol: UDP
+    - name: tcp-5217
+      port: 5217
+      targetPort: 5217
+      protocol: TCP
+    - name: udp-5217
+      port: 5217
+      targetPort: 5217
+      protocol: UDP
+    - name: tcp-5218
+      port: 5218
+      targetPort: 5218
+      protocol: TCP
+    - name: udp-5218
+      port: 5218
+      targetPort: 5218
+      protocol: UDP
+    - name: tcp-5219
+      port: 5219
+      targetPort: 5219
+      protocol: TCP
+    - name: udp-5219
+      port: 5219
+      targetPort: 5219
+      protocol: UDP
+    - name: tcp-5220
+      port: 5220
+      targetPort: 5220
+      protocol: TCP
+    - name: udp-5220
+      port: 5220
+      targetPort: 5220
+      protocol: UDP
+    - name: tcp-5221
+      port: 5221
+      targetPort: 5221
+      protocol: TCP
+    - name: udp-5221
+      port: 5221
+      targetPort: 5221
+      protocol: UDP
+    - name: tcp-5222
+      port: 5222
+      targetPort: 5222
+      protocol: TCP
+    - name: udp-5222
+      port: 5222
+      targetPort: 5222
+      protocol: UDP
+    - name: tcp-5223
+      port: 5223
+      targetPort: 5223
+      protocol: TCP
+    - name: udp-5223
+      port: 5223
+      targetPort: 5223
+      protocol: UDP
+    - name: tcp-5224
+      port: 5224
+      targetPort: 5224
+      protocol: TCP
+    - name: udp-5224
+      port: 5224
+      targetPort: 5224
+      protocol: UDP
+    - name: tcp-5225
+      port: 5225
+      targetPort: 5225
+      protocol: TCP
+    - name: udp-5225
+      port: 5225
+      targetPort: 5225
+      protocol: UDP
+    - name: tcp-5226
+      port: 5226
+      targetPort: 5226
+      protocol: TCP
+    - name: udp-5226
+      port: 5226
+      targetPort: 5226
+      protocol: UDP
+    - name: tcp-5227
+      port: 5227
+      targetPort: 5227
+      protocol: TCP
+    - name: udp-5227
+      port: 5227
+      targetPort: 5227
+      protocol: UDP
+    - name: tcp-5228
+      port: 5228
+      targetPort: 5228
+      protocol: TCP
+    - name: udp-5228
+      port: 5228
+      targetPort: 5228
+      protocol: UDP
+    - name: tcp-5229
+      port: 5229
+      targetPort: 5229
+      protocol: TCP
+    - name: udp-5229
+      port: 5229
+      targetPort: 5229
+      protocol: UDP
+    - name: tcp-5230
+      port: 5230
+      targetPort: 5230
+      protocol: TCP
+    - name: udp-5230
+      port: 5230
+      targetPort: 5230
+      protocol: UDP
+    - name: tcp-5231
+      port: 5231
+      targetPort: 5231
+      protocol: TCP
+    - name: udp-5231
+      port: 5231
+      targetPort: 5231
+      protocol: UDP
+    - name: tcp-5232
+      port: 5232
+      targetPort: 5232
+      protocol: TCP
+    - name: udp-5232
+      port: 5232
+      targetPort: 5232
+      protocol: UDP
+    - name: tcp-5233
+      port: 5233
+      targetPort: 5233
+      protocol: TCP
+    - name: udp-5233
+      port: 5233
+      targetPort: 5233
+      protocol: UDP
+    - name: tcp-5234
+      port: 5234
+      targetPort: 5234
+      protocol: TCP
+    - name: udp-5234
+      port: 5234
+      targetPort: 5234
+      protocol: UDP
+    - name: tcp-5235
+      port: 5235
+      targetPort: 5235
+      protocol: TCP
+    - name: udp-5235
+      port: 5235
+      targetPort: 5235
+      protocol: UDP
+    - name: tcp-5236
+      port: 5236
+      targetPort: 5236
+      protocol: TCP
+    - name: udp-5236
+      port: 5236
+      targetPort: 5236
+      protocol: UDP
+    - name: tcp-5237
+      port: 5237
+      targetPort: 5237
+      protocol: TCP
+    - name: udp-5237
+      port: 5237
+      targetPort: 5237
+      protocol: UDP
+    - name: tcp-5238
+      port: 5238
+      targetPort: 5238
+      protocol: TCP
+    - name: udp-5238
+      port: 5238
+      targetPort: 5238
+      protocol: UDP
+    - name: tcp-5239
+      port: 5239
+      targetPort: 5239
+      protocol: TCP
+    - name: udp-5239
+      port: 5239
+      targetPort: 5239
+      protocol: UDP
+    - name: tcp-5240
+      port: 5240
+      targetPort: 5240
+      protocol: TCP
+    - name: udp-5240
+      port: 5240
+      targetPort: 5240
+      protocol: UDP
+    - name: tcp-5241
+      port: 5241
+      targetPort: 5241
+      protocol: TCP
+    - name: udp-5241
+      port: 5241
+      targetPort: 5241
+      protocol: UDP
+    - name: tcp-5242
+      port: 5242
+      targetPort: 5242
+      protocol: TCP
+    - name: udp-5242
+      port: 5242
+      targetPort: 5242
+      protocol: UDP
+    - name: tcp-5243
+      port: 5243
+      targetPort: 5243
+      protocol: TCP
+    - name: udp-5243
+      port: 5243
+      targetPort: 5243
+      protocol: UDP
+    - name: tcp-5244
+      port: 5244
+      targetPort: 5244
+      protocol: TCP
+    - name: udp-5244
+      port: 5244
+      targetPort: 5244
+      protocol: UDP
+    - name: tcp-5245
+      port: 5245
+      targetPort: 5245
+      protocol: TCP
+    - name: udp-5245
+      port: 5245
+      targetPort: 5245
+      protocol: UDP
+    - name: tcp-5246
+      port: 5246
+      targetPort: 5246
+      protocol: TCP
+    - name: udp-5246
+      port: 5246
+      targetPort: 5246
+      protocol: UDP
+    - name: tcp-5247
+      port: 5247
+      targetPort: 5247
+      protocol: TCP
+    - name: udp-5247
+      port: 5247
+      targetPort: 5247
+      protocol: UDP
+    - name: tcp-5248
+      port: 5248
+      targetPort: 5248
+      protocol: TCP
+    - name: udp-5248
+      port: 5248
+      targetPort: 5248
+      protocol: UDP
+    - name: tcp-5249
+      port: 5249
+      targetPort: 5249
+      protocol: TCP
+    - name: udp-5249
+      port: 5249
+      targetPort: 5249
+      protocol: UDP
+    - name: tcp-5250
+      port: 5250
+      targetPort: 5250
+      protocol: TCP
+    - name: udp-5250
+      port: 5250
+      targetPort: 5250
+      protocol: UDP
+    - name: tcp-5251
+      port: 5251
+      targetPort: 5251
+      protocol: TCP
+    - name: udp-5251
+      port: 5251
+      targetPort: 5251
+      protocol: UDP
+    - name: tcp-5252
+      port: 5252
+      targetPort: 5252
+      protocol: TCP
+    - name: udp-5252
+      port: 5252
+      targetPort: 5252
+      protocol: UDP
+    - name: tcp-5253
+      port: 5253
+      targetPort: 5253
+      protocol: TCP
+    - name: udp-5253
+      port: 5253
+      targetPort: 5253
+      protocol: UDP
+    - name: tcp-5254
+      port: 5254
+      targetPort: 5254
+      protocol: TCP
+    - name: udp-5254
+      port: 5254
+      targetPort: 5254
+      protocol: UDP
+    - name: tcp-5255
+      port: 5255
+      targetPort: 5255
+      protocol: TCP
+    - name: udp-5255
+      port: 5255
+      targetPort: 5255
+      protocol: UDP
+    - name: tcp-5256
+      port: 5256
+      targetPort: 5256
+      protocol: TCP
+    - name: udp-5256
+      port: 5256
+      targetPort: 5256
+      protocol: UDP
+    - name: tcp-5257
+      port: 5257
+      targetPort: 5257
+      protocol: TCP
+    - name: udp-5257
+      port: 5257
+      targetPort: 5257
+      protocol: UDP
+    - name: tcp-5258
+      port: 5258
+      targetPort: 5258
+      protocol: TCP
+    - name: udp-5258
+      port: 5258
+      targetPort: 5258
+      protocol: UDP
+    - name: tcp-5259
+      port: 5259
+      targetPort: 5259
+      protocol: TCP
+    - name: udp-5259
+      port: 5259
+      targetPort: 5259
+      protocol: UDP
+    - name: tcp-5260
+      port: 5260
+      targetPort: 5260
+      protocol: TCP
+    - name: udp-5260
+      port: 5260
+      targetPort: 5260
+      protocol: UDP
+    - name: tcp-5261
+      port: 5261
+      targetPort: 5261
+      protocol: TCP
+    - name: udp-5261
+      port: 5261
+      targetPort: 5261
+      protocol: UDP
+    - name: tcp-5262
+      port: 5262
+      targetPort: 5262
+      protocol: TCP
+    - name: udp-5262
+      port: 5262
+      targetPort: 5262
+      protocol: UDP
+    - name: tcp-5263
+      port: 5263
+      targetPort: 5263
+      protocol: TCP
+    - name: udp-5263
+      port: 5263
+      targetPort: 5263
+      protocol: UDP
+    - name: tcp-5264
+      port: 5264
+      targetPort: 5264
+      protocol: TCP
+    - name: udp-5264
+      port: 5264
+      targetPort: 5264
+      protocol: UDP
+    - name: tcp-5265
+      port: 5265
+      targetPort: 5265
+      protocol: TCP
+    - name: udp-5265
+      port: 5265
+      targetPort: 5265
+      protocol: UDP
+    - name: tcp-5266
+      port: 5266
+      targetPort: 5266
+      protocol: TCP
+    - name: udp-5266
+      port: 5266
+      targetPort: 5266
+      protocol: UDP
+    - name: tcp-5267
+      port: 5267
+      targetPort: 5267
+      protocol: TCP
+    - name: udp-5267
+      port: 5267
+      targetPort: 5267
+      protocol: UDP
+    - name: tcp-5268
+      port: 5268
+      targetPort: 5268
+      protocol: TCP
+    - name: udp-5268
+      port: 5268
+      targetPort: 5268
+      protocol: UDP
+    - name: tcp-5269
+      port: 5269
+      targetPort: 5269
+      protocol: TCP
+    - name: udp-5269
+      port: 5269
+      targetPort: 5269
+      protocol: UDP
+    - name: tcp-5270
+      port: 5270
+      targetPort: 5270
+      protocol: TCP
+    - name: udp-5270
+      port: 5270
+      targetPort: 5270
+      protocol: UDP
+    - name: tcp-5271
+      port: 5271
+      targetPort: 5271
+      protocol: TCP
+    - name: udp-5271
+      port: 5271
+      targetPort: 5271
+      protocol: UDP
+    - name: tcp-5272
+      port: 5272
+      targetPort: 5272
+      protocol: TCP
+    - name: udp-5272
+      port: 5272
+      targetPort: 5272
+      protocol: UDP
+    - name: tcp-5273
+      port: 5273
+      targetPort: 5273
+      protocol: TCP
+    - name: udp-5273
+      port: 5273
+      targetPort: 5273
+      protocol: UDP
+    - name: tcp-5274
+      port: 5274
+      targetPort: 5274
+      protocol: TCP
+    - name: udp-5274
+      port: 5274
+      targetPort: 5274
+      protocol: UDP
+    - name: tcp-5275
+      port: 5275
+      targetPort: 5275
+      protocol: TCP
+    - name: udp-5275
+      port: 5275
+      targetPort: 5275
+      protocol: UDP
+    - name: tcp-5276
+      port: 5276
+      targetPort: 5276
+      protocol: TCP
+    - name: udp-5276
+      port: 5276
+      targetPort: 5276
+      protocol: UDP
+    - name: tcp-5277
+      port: 5277
+      targetPort: 5277
+      protocol: TCP
+    - name: udp-5277
+      port: 5277
+      targetPort: 5277
+      protocol: UDP
+    - name: tcp-5278
+      port: 5278
+      targetPort: 5278
+      protocol: TCP
+    - name: udp-5278
+      port: 5278
+      targetPort: 5278
+      protocol: UDP
+    - name: tcp-5279
+      port: 5279
+      targetPort: 5279
+      protocol: TCP
+    - name: udp-5279
+      port: 5279
+      targetPort: 5279
+      protocol: UDP
+    - name: tcp-5280
+      port: 5280
+      targetPort: 5280
+      protocol: TCP
+    - name: udp-5280
+      port: 5280
+      targetPort: 5280
+      protocol: UDP
+    - name: tcp-5281
+      port: 5281
+      targetPort: 5281
+      protocol: TCP
+    - name: udp-5281
+      port: 5281
+      targetPort: 5281
+      protocol: UDP
+    - name: tcp-5282
+      port: 5282
+      targetPort: 5282
+      protocol: TCP
+    - name: udp-5282
+      port: 5282
+      targetPort: 5282
+      protocol: UDP
+    - name: tcp-5283
+      port: 5283
+      targetPort: 5283
+      protocol: TCP
+    - name: udp-5283
+      port: 5283
+      targetPort: 5283
+      protocol: UDP
+    - name: tcp-5284
+      port: 5284
+      targetPort: 5284
+      protocol: TCP
+    - name: udp-5284
+      port: 5284
+      targetPort: 5284
+      protocol: UDP
+    - name: tcp-5285
+      port: 5285
+      targetPort: 5285
+      protocol: TCP
+    - name: udp-5285
+      port: 5285
+      targetPort: 5285
+      protocol: UDP
+    - name: tcp-5286
+      port: 5286
+      targetPort: 5286
+      protocol: TCP
+    - name: udp-5286
+      port: 5286
+      targetPort: 5286
+      protocol: UDP
+    - name: tcp-5287
+      port: 5287
+      targetPort: 5287
+      protocol: TCP
+    - name: udp-5287
+      port: 5287
+      targetPort: 5287
+      protocol: UDP
+    - name: tcp-5288
+      port: 5288
+      targetPort: 5288
+      protocol: TCP
+    - name: udp-5288
+      port: 5288
+      targetPort: 5288
+      protocol: UDP
+    - name: tcp-5289
+      port: 5289
+      targetPort: 5289
+      protocol: TCP
+    - name: udp-5289
+      port: 5289
+      targetPort: 5289
+      protocol: UDP
+    - name: tcp-5290
+      port: 5290
+      targetPort: 5290
+      protocol: TCP
+    - name: udp-5290
+      port: 5290
+      targetPort: 5290
+      protocol: UDP
+    - name: tcp-5291
+      port: 5291
+      targetPort: 5291
+      protocol: TCP
+    - name: udp-5291
+      port: 5291
+      targetPort: 5291
+      protocol: UDP
+    - name: tcp-5292
+      port: 5292
+      targetPort: 5292
+      protocol: TCP
+    - name: udp-5292
+      port: 5292
+      targetPort: 5292
+      protocol: UDP
+    - name: tcp-5293
+      port: 5293
+      targetPort: 5293
+      protocol: TCP
+    - name: udp-5293
+      port: 5293
+      targetPort: 5293
+      protocol: UDP
+    - name: tcp-5294
+      port: 5294
+      targetPort: 5294
+      protocol: TCP
+    - name: udp-5294
+      port: 5294
+      targetPort: 5294
+      protocol: UDP
+    - name: tcp-5295
+      port: 5295
+      targetPort: 5295
+      protocol: TCP
+    - name: udp-5295
+      port: 5295
+      targetPort: 5295
+      protocol: UDP
+    - name: tcp-5296
+      port: 5296
+      targetPort: 5296
+      protocol: TCP
+    - name: udp-5296
+      port: 5296
+      targetPort: 5296
+      protocol: UDP
+    - name: tcp-5297
+      port: 5297
+      targetPort: 5297
+      protocol: TCP
+    - name: udp-5297
+      port: 5297
+      targetPort: 5297
+      protocol: UDP
+    - name: tcp-5298
+      port: 5298
+      targetPort: 5298
+      protocol: TCP
+    - name: udp-5298
+      port: 5298
+      targetPort: 5298
+      protocol: UDP
+    - name: tcp-5299
+      port: 5299
+      targetPort: 5299
+      protocol: TCP
+    - name: udp-5299
+      port: 5299
+      targetPort: 5299
+      protocol: UDP
+    - name: tcp-5300
+      port: 5300
+      targetPort: 5300
+      protocol: TCP
+    - name: udp-5300
+      port: 5300
+      targetPort: 5300
+      protocol: UDP
