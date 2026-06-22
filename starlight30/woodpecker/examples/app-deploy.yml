@@ -26,7 +26,7 @@ when:
 
 steps:
   build-and-push:
-    image: woodpeckerci/plugin-docker-buildx:5-insecure
+    image: woodpeckerci/plugin-docker-buildx:6-insecure@sha256:57f35067e03d6042187ab61c8d64481499d72a4d7ce4660f5fb93c2e872f40f0
     settings:
       repo: *image
       tags:
