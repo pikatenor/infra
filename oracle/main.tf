@@ -3,6 +3,7 @@ module "vcn" {
   version = "4.0.0"
 
   compartment_id = local.root_compartment_id
+  tenancy_id    =  local.root_compartment_id
   region         = "ap-tokyo-1"
 
   label_prefix  = "yotsuboshi"
