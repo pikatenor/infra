@@ -35,7 +35,4 @@ helm:
 dependsOn:
   - selector:
       matchLabels:
-        app: traefik-crds
-  - selector:
-      matchLabels:
         app: cert-manager
