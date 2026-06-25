@@ -43,6 +43,7 @@ spec:
             successThreshold: 2
             timeoutSeconds: 2
           resources: {}
+      nodeName: juno4a
       imagePullSecrets:
         - name: p1kachu
         - name: c.p1kachu.net
