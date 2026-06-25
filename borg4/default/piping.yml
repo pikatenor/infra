@@ -14,6 +14,7 @@ spec:
       labels:
         workload.user.cattle.io/workloadselector: deployment-default-piping
     spec:
+      nodeName: juno4a
       containers:
       - image: nwtgck/piping-server:v1.12.9@sha256:2b8452c93e5bc6dd7b1f1bfcb5df85bf973a8b167082823a4b986bfb930a7c1a
         imagePullPolicy: Always

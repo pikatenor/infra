@@ -66,6 +66,7 @@ spec:
               mountPath: /db
         #- name: locales
         #  mountPath: /opt/lavamusic/locales
+      nodeName: juno4a
       imagePullSecrets:
         - name: c.p1kachu.net
       volumes:

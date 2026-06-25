@@ -26,5 +26,6 @@ spec:
         imagePullPolicy: Always
         name: mumbot
         resources: {}
+      nodeName: juno4a
       imagePullSecrets:
       - name: p1kachu
