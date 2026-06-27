@@ -8,7 +8,8 @@ helm:
     deployment:
       kind: DaemonSet
     service:
-      type: NodePort
+      spec:
+        type: NodePort
     ports:
       web:
         nodePort: 80
