@@ -114,6 +114,17 @@ jobs:
           changed_file="changed-files-${{ matrix.cluster }}.txt"
           fleet_summary_file="fleet-bundle-summary-${{ matrix.cluster }}.md"
 
+          # `fleet apply` (used below to render raw bundles) needs a kubeconfig
+          # to resolve targets even with `-o -`. Decode the CI kubeconfig up
+          # front so raw bundles render like helm bundles.
+          ci_kubeconfig=""
+          if [[ -n "${KUBECONFIG_B64:-}" ]]; then
+            ci_kubeconfig="$(mktemp)"
+            printf '%s' "$KUBECONFIG_B64" | base64 -d > "$ci_kubeconfig"
+            chmod 600 "$ci_kubeconfig"
+            export KUBECONFIG="$ci_kubeconfig"
+          fi
+
           is_helm_only_bundle() {
             local dir="$1"
             local other_count
@@ -147,22 +158,38 @@ jobs:
             mkdir -p "$tmp_root/base"
             mkdir -p "$tmp_root/out"
 
+            # A bundle added in this PR has no base revision. Detect that up
+            # front so we treat base as empty (the diff then shows the full
+            # addition) instead of erroring on a missing path.
+            base_exists="true"
+            if ! git cat-file -e "${base_sha}:${bundle_dir}" 2>/dev/null; then
+              base_exists="false"
+            fi
+
+            base_out="$tmp_root/out/base-${safe_name}.yaml"
+            head_out="$tmp_root/out/head-${safe_name}.yaml"
+            [[ "$base_exists" == "true" ]] || : > "$base_out"
+
             if is_helm_only_bundle "$bundle_dir"; then
               echo "Helm-only bundle; rendering chart with helm template." >> "$fleet_summary_file"
 
-              if ! git archive "$base_sha" "$bundle_dir" | tar -x -C "$tmp_root/base"; then
-                echo "Failed to extract base revision for ${bundle_dir}." >> "$fleet_summary_file"
-                had_error="true"
-                echo >> "$fleet_summary_file"
-                continue
+              base_render_code=0
+              if [[ "$base_exists" == "true" ]]; then
+                if ! git archive "$base_sha" "$bundle_dir" | tar -x -C "$tmp_root/base"; then
+                  echo "Failed to extract base revision for ${bundle_dir}." >> "$fleet_summary_file"
+                  had_error="true"
+                  echo >> "$fleet_summary_file"
+                  continue
+                fi
+                set +e
+                ./scripts/fleet-helm-template.sh "$tmp_root/base/$bundle_dir" > "$base_out" 2>&1
+                base_render_code=$?
+                set -e
+              else
+                echo "New bundle in this PR (absent in base); showing full addition." >> "$fleet_summary_file"
               fi
 
-              base_out="$tmp_root/out/base-${safe_name}.yaml"
-              head_out="$tmp_root/out/head-${safe_name}.yaml"
-
               set +e
-              ./scripts/fleet-helm-template.sh "$tmp_root/base/$bundle_dir" > "$base_out" 2>&1
-              base_render_code=$?
               ./scripts/fleet-helm-template.sh "$bundle_dir" > "$head_out" 2>&1
               head_render_code=$?
               set -e
@@ -210,19 +237,23 @@ jobs:
               continue
             fi
 
-            if ! git archive "$base_sha" "$bundle_dir" | tar -x -C "$tmp_root/base"; then
-              echo "Failed to extract base revision for ${bundle_dir}." >> "$fleet_summary_file"
-              had_error="true"
-              echo >> "$fleet_summary_file"
-              continue
+            base_render_code=0
+            if [[ "$base_exists" == "true" ]]; then
+              if ! git archive "$base_sha" "$bundle_dir" | tar -x -C "$tmp_root/base"; then
+                echo "Failed to extract base revision for ${bundle_dir}." >> "$fleet_summary_file"
+                had_error="true"
+                echo >> "$fleet_summary_file"
+                continue
+              fi
+              set +e
+              fleet apply --driven-scan -o - "base-${safe_name}" "$tmp_root/base/$bundle_dir" > "$base_out" 2>&1
+              base_render_code=$?
+              set -e
+            else
+              echo "New bundle in this PR (absent in base); showing full addition." >> "$fleet_summary_file"
             fi
 
-            base_out="$tmp_root/out/base-${safe_name}.yaml"
-            head_out="$tmp_root/out/head-${safe_name}.yaml"
-
             set +e
-            fleet apply --driven-scan -o - "base-${safe_name}" "$tmp_root/base/$bundle_dir" > "$base_out" 2>&1
-            base_render_code=$?
             fleet apply --driven-scan -o - "head-${safe_name}" "$bundle_dir" > "$head_out" 2>&1
             head_render_code=$?
             set -e
