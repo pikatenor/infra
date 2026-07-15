@@ -1,0 +1,41 @@
+defaultNamespace: litellm
+labels:
+  app: litellm
+
+helm:
+  chart: oci://ghcr.io/berriai/litellm-helm
+  version: 1.92.0
+  releaseName: litellm
+  values:
+    # Master key + provider API keys + DB credentials all live in the single
+    # out-of-band Secret `litellm` (borg4/litellm/resources/litellm.secret.yml).
+    masterkeySecretName: litellm
+    masterkeySecretKey: masterkey
+    environmentSecrets:
+      - litellm
+
+    db:
+      useExisting: true
+      deployStandalone: false
+      endpoint: litellm-psql
+      database: litellm
+      url: postgresql://$(DATABASE_USERNAME):$(DATABASE_PASSWORD)@$(DATABASE_HOST)/$(DATABASE_NAME)
+      secret:
+        name: litellm
+        usernameKey: db-username
+        passwordKey: db-password
+
+    # Proxy config is authored as a separate ConfigMap in resources/config.yml
+    # so model/provider edits don't require re-rendering the Helm bundle.
+    proxyConfigMap:
+      create: false
+      name: litellm-config
+
+    service:
+      type: LoadBalancer
+      port: 4000
+
+dependsOn:
+  - selector:
+      matchLabels:
+        app: litellm-resources
