@@ -158,9 +158,6 @@ jobs:
             mkdir -p "$tmp_root/base"
             mkdir -p "$tmp_root/out"
 
-            # A bundle added in this PR has no base revision. Detect that up
-            # front so we treat base as empty (the diff then shows the full
-            # addition) instead of erroring on a missing path.
             base_exists="true"
             if ! git cat-file -e "${base_sha}:${bundle_dir}" 2>/dev/null; then
               base_exists="false"
