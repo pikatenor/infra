@@ -13423,7 +13423,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: cert-manager-cainjector
-          image: "quay.io/jetstack/cert-manager-cainjector:v1.20.3@sha256:06ad347fe0dc2eb84cc355c26f6752e05e87dceb6447f5cd29b963dd66dfd8bd"
+          image: "quay.io/jetstack/cert-manager-cainjector:v1.21.0@sha256:ad1dcc5b2fccc420f9b3fbee7ce8a869450c540fd4f2f41de2d95b1ca0c4d701"
           imagePullPolicy: IfNotPresent
           args:
           - --v=2
@@ -13491,7 +13491,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: cert-manager-controller
-          image: "quay.io/jetstack/cert-manager-controller:v1.20.3@sha256:6c13d61e0348a5bc3477f8ea9a928624300b30d19b1c72a7d2b90372fc713db4"
+          image: "quay.io/jetstack/cert-manager-controller:v1.21.0@sha256:e370f7800a53078e9d74324287a7d52b553864e55f5b4e521f911c3f6c7da203"
           imagePullPolicy: IfNotPresent
           args:
           - --v=2
@@ -13578,7 +13578,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: cert-manager-webhook
-          image: "quay.io/jetstack/cert-manager-webhook:v1.20.3@sha256:a61e817632cebed3bb59a189327e786fa3fdd7597167d994a1848d98fd55848f"
+          image: "quay.io/jetstack/cert-manager-webhook:v1.21.0@sha256:c33cca307541e2d58861a55b1af5f390b7e19c8741e48b433693b73a7cce88b3"
           imagePullPolicy: IfNotPresent
           args:
           - --v=2
@@ -13835,7 +13835,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: cert-manager-startupapicheck
-          image: "quay.io/jetstack/cert-manager-startupapicheck:v1.20.3@sha256:b0c9a2c18d02f3c40a9e091a6fe9afdf39cbf7fb2d9acc18c9881c21c625f2dc"
+          image: "quay.io/jetstack/cert-manager-startupapicheck:v1.21.0@sha256:68b3c5029dc63e64a6b6435337d7dc0eb169f889a48a02d999d1f22f31865b33"
           imagePullPolicy: IfNotPresent
           args:
           - check
