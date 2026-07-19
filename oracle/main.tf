@@ -305,7 +305,7 @@ resource "oci_core_security_list" "oke-api-security-list" {
 
 resource "oci_containerengine_cluster" "oke25" {
   compartment_id     = local.root_compartment_id
-  kubernetes_version = "v1.31.10"
+  kubernetes_version = "v1.32.10"
   name               = "yuzu"
   vcn_id             = module.vcn.vcn_id
 
