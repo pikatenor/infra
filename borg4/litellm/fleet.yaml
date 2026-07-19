@@ -4,7 +4,7 @@ labels:
 
 helm:
   chart: oci://ghcr.io/berriai/litellm-helm
-  version: 1.92.0
+  version: 1.93.0
   releaseName: litellm
   values:
     # Master key + provider API keys + DB credentials all live in the single
