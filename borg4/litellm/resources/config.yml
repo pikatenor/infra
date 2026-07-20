@@ -8,18 +8,19 @@ data:
     # LiteLLM proxy config. API keys are sourced from the `litellm` Secret
     # (environmentSecrets) via os.environ/<NAME>. Wildcard model_name entries
     # route any model under that provider.
-    model_list:
-      - model_name: "anthropic/*"
-        litellm_params:
-          model: "anthropic/*"
-          api_key: os.environ/ANTHROPIC_API_KEY
-      - model_name: "openai/*"
-        litellm_params:
-          model: "openai/*"
-          api_key: os.environ/OPENAI_API_KEY
-      - model_name: "gemini/*"
-        litellm_params:
-          model: "gemini/*"
-          api_key: os.environ/GEMINI_API_KEY
+    # model_list:
+    #   - model_name: "anthropic/*"
+    #     litellm_params:
+    #       model: "anthropic/*"
+    #       api_key: os.environ/ANTHROPIC_API_KEY
+    #   - model_name: "openai/*"
+    #     litellm_params:
+    #       model: "openai/*"
+    #       api_key: os.environ/OPENAI_API_KEY
+    #   - model_name: "gemini/*"
+    #     litellm_params:
+    #       model: "gemini/*"
+    #       api_key: os.environ/GEMINI_API_KEY
     general_settings:
       master_key: os.environ/PROXY_MASTER_KEY
+      store_model_in_db: true
