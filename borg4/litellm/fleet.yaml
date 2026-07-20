@@ -7,6 +7,9 @@ helm:
   version: 1.93.0
   releaseName: litellm
   values:
+    image:
+      repository: ghcr.io/pikatenor/litellm-patched-image
+
     # Master key + provider API keys + DB credentials all live in the single
     # out-of-band Secret `litellm` (borg4/litellm/resources/litellm.secret.yml).
     masterkeySecretName: litellm
