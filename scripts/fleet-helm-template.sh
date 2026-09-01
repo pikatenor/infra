@@ -55,6 +55,27 @@ if chart.startswith("oci://"):
 elif repo and chart:
     helm_args.extend([chart, "--repo", repo])
 elif chart:
+    # Fleet supports go-getter git chart URLs (e.g.
+    # github.com/owner/repo//path/to/chart?ref=v1.2.3), but `helm template`
+    # does not. Fetch the chart into a local dir first.
+    if "//" in chart and not chart.startswith(("./", "../", "/")):
+        import tempfile
+
+        repo_part, _, subpath = chart.partition("//")
+        subpath, _, query = subpath.partition("?")
+        ref = ""
+        for param in query.split("&"):
+            if param.startswith("ref="):
+                ref = param[len("ref="):]
+                break
+
+        tmpdir = tempfile.mkdtemp(prefix="fleet-helm-chart-")
+        clone_cmd = ["git", "clone", "--depth", "1"]
+        if ref:
+            clone_cmd.extend(["--branch", ref])
+        clone_cmd.extend(["https://" + repo_part, tmpdir])
+        subprocess.run(clone_cmd, check=True, capture_output=True, text=True)
+        chart = os.path.join(tmpdir, subpath)
     helm_args.append(chart)
 else:
     print("fleet.yaml helm.chart is not set", file=sys.stderr)
