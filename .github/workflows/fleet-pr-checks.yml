@@ -43,7 +43,7 @@ jobs:
         id: changed
         shell: bash
         run: |
-          set -euo pipefail
+          . "$GITHUB_WORKSPACE/scripts/ci/lib.sh" || exit 1
           base_sha="${{ github.event.pull_request.base.sha }}"
           head_sha="${{ github.event.pull_request.head.sha }}"
           target_dir="${{ matrix.dir }}"
@@ -53,6 +53,9 @@ jobs:
 
           git diff --name-only "$base_sha" "$head_sha" -- '*.yml' '*.yaml' > "$all_changed_file"
           grep -E "^${target_dir}.*\.(yml|yaml)$" "$all_changed_file" > "$changed_file" || true
+
+          ci_dump "changed YAML files in PR (all clusters)" "$all_changed_file"
+          ci_dump "changed YAML files under ${target_dir}" "$changed_file"
 
           if [[ -s "$changed_file" ]]; then
             {
@@ -86,8 +89,13 @@ jobs:
         # Uses the repo-root .yamllint (relaxed + line-length disabled, generated
         # manifests ignored). Do not pass `-d` here, or it overrides that file.
         run: |
-          set -euo pipefail
-          xargs -r yamllint < "changed-files-${{ matrix.cluster }}.txt"
+          . "$GITHUB_WORKSPACE/scripts/ci/lib.sh" || exit 1
+          mapfile -t files < "changed-files-${{ matrix.cluster }}.txt"
+          if [[ ${#files[@]} -eq 0 ]]; then
+            ci_log "no changed files to lint"
+            exit 0
+          fi
+          ci_run yamllint "${files[@]}"
 
       - name: Install Fleet CLI and Helm
         if: steps.changed.outputs.has_files == 'true'
@@ -97,18 +105,18 @@ jobs:
         if: steps.changed.outputs.has_files == 'true'
         shell: bash
         run: |
-          set -euo pipefail
-          curl -sSL -o fleet https://github.com/rancher/fleet/releases/latest/download/fleet-linux-amd64
+          . "$GITHUB_WORKSPACE/scripts/ci/lib.sh" || exit 1
+          ci_run curl -sSL -o fleet https://github.com/rancher/fleet/releases/latest/download/fleet-linux-amd64
           chmod +x fleet
           sudo mv fleet /usr/local/bin/fleet
-          fleet --version
-          helm version
+          ci_run fleet --version
+          ci_run helm version
 
       - name: Diff Fleet bundles from fleet.yaml changes
         if: steps.changed.outputs.has_files == 'true'
         shell: bash
         run: |
-          set -euo pipefail
+          . "$GITHUB_WORKSPACE/scripts/ci/lib.sh" || exit 1
 
           base_sha="${{ github.event.pull_request.base.sha }}"
           changed_file="changed-files-${{ matrix.cluster }}.txt"
@@ -153,6 +161,7 @@ jobs:
             bundle_dir="$(dirname "$fleet_file")"
             safe_name="$(echo "$bundle_dir" | tr '/.' '__')"
 
+            ci_log "rendering bundle ${bundle_dir}"
             echo "#### ${bundle_dir}" >> "$fleet_summary_file"
 
             mkdir -p "$tmp_root/base"
@@ -173,6 +182,7 @@ jobs:
               base_render_code=0
               if [[ "$base_exists" == "true" ]]; then
                 if ! git archive "$base_sha" "$bundle_dir" | tar -x -C "$tmp_root/base"; then
+                  ci_error "failed to extract base revision for ${bundle_dir}"
                   echo "Failed to extract base revision for ${bundle_dir}." >> "$fleet_summary_file"
                   had_error="true"
                   echo >> "$fleet_summary_file"
@@ -193,6 +203,9 @@ jobs:
 
               if [[ $base_render_code -ne 0 || $head_render_code -ne 0 ]]; then
                 had_error="true"
+                ci_error "helm render failed for ${bundle_dir} (base=${base_render_code}, head=${head_render_code})"
+                [[ $base_render_code -eq 0 ]] || ci_dump "helm render output [base] ${bundle_dir}" "$base_out"
+                [[ $head_render_code -eq 0 ]] || ci_dump "helm render output [head] ${bundle_dir}" "$head_out"
                 echo "Helm render failed." >> "$fleet_summary_file"
                 if [[ $base_render_code -ne 0 && -s "$base_out" ]]; then
                   echo '```text' >> "$fleet_summary_file"
@@ -228,6 +241,8 @@ jobs:
                 echo '```' >> "$fleet_summary_file"
               else
                 had_error="true"
+                ci_error "diff failed for ${bundle_dir} (exit ${diff_code})"
+                ci_dump "diff output ${bundle_dir}" "$diff_file"
                 echo "diff failed (exit ${diff_code})." >> "$fleet_summary_file"
               fi
               echo >> "$fleet_summary_file"
@@ -237,6 +252,7 @@ jobs:
             base_render_code=0
             if [[ "$base_exists" == "true" ]]; then
               if ! git archive "$base_sha" "$bundle_dir" | tar -x -C "$tmp_root/base"; then
+                ci_error "failed to extract base revision for ${bundle_dir}"
                 echo "Failed to extract base revision for ${bundle_dir}." >> "$fleet_summary_file"
                 had_error="true"
                 echo >> "$fleet_summary_file"
@@ -257,6 +273,9 @@ jobs:
 
             if [[ $base_render_code -ne 0 || $head_render_code -ne 0 ]]; then
               had_error="true"
+              ci_error "fleet apply failed for ${bundle_dir} (base=${base_render_code}, head=${head_render_code})"
+              [[ $base_render_code -eq 0 ]] || ci_dump "fleet apply output [base] ${bundle_dir}" "$base_out"
+              [[ $head_render_code -eq 0 ]] || ci_dump "fleet apply output [head] ${bundle_dir}" "$head_out"
               echo "Fleet render failed." >> "$fleet_summary_file"
               if [[ $base_render_code -ne 0 && -s "$base_out" ]]; then
                 echo '```text' >> "$fleet_summary_file"
@@ -292,6 +311,8 @@ jobs:
               echo '```' >> "$fleet_summary_file"
             else
               had_error="true"
+              ci_error "diff failed for ${bundle_dir} (exit ${diff_code})"
+              ci_dump "diff output ${bundle_dir}" "$diff_file"
               echo "diff failed (exit ${diff_code})." >> "$fleet_summary_file"
             fi
 
@@ -310,7 +331,7 @@ jobs:
         if: steps.changed.outputs.has_files == 'true' && env.KUBECONFIG_B64 != ''
         shell: bash
         run: |
-          set -euo pipefail
+          . "$GITHUB_WORKSPACE/scripts/ci/lib.sh" || exit 1
           mkdir -p "$HOME/.kube"
           echo "$KUBECONFIG_B64" | base64 --decode > "$HOME/.kube/config"
           chmod 600 "$HOME/.kube/config"
@@ -319,14 +340,15 @@ jobs:
         if: steps.changed.outputs.has_files == 'true' && env.KUBECONFIG_B64 != ''
         shell: bash
         run: |
-          set -euo pipefail
+          . "$GITHUB_WORKSPACE/scripts/ci/lib.sh" || exit 1
           if ! kubectl config get-contexts -o name | grep -Fxq "${{ matrix.context }}"; then
-            echo "Context '${{ matrix.context }}' not found in kubeconfig." >&2
-            echo "Available contexts:" >&2
-            kubectl config get-contexts -o name >&2
+            ci_error "context '${{ matrix.context }}' not found in kubeconfig"
+            ci_group "available contexts"
+            kubectl config get-contexts -o name
+            ci_endgroup
             exit 1
           fi
-          kubectl config use-context "${{ matrix.context }}"
+          ci_run kubectl config use-context "${{ matrix.context }}"
 
       - name: Install kubediff
         if: steps.changed.outputs.has_files == 'true' && env.KUBECONFIG_B64 != ''
@@ -334,18 +356,18 @@ jobs:
         env:
           KUBEDIFF_VERSION: v1.33.4
         run: |
-          set -euo pipefail
+          . "$GITHUB_WORKSPACE/scripts/ci/lib.sh" || exit 1
           tmpdir="$(mktemp -d)"
           curl -sSL "https://github.com/sepich/kubediff/releases/download/${KUBEDIFF_VERSION}/kubediff-linux-amd64.tar.gz" \
             | tar -xz -C "$tmpdir"
           sudo mv "$tmpdir/kubediff" /usr/local/bin/kubediff
-          kubediff -v
+          ci_run kubediff -v
 
       - name: Run kubediff on changed files
         if: steps.changed.outputs.has_files == 'true' && env.KUBECONFIG_B64 != ''
         shell: bash
         run: |
-          set -euo pipefail
+          . "$GITHUB_WORKSPACE/scripts/ci/lib.sh" || exit 1
 
           changed_file="changed-files-${{ matrix.cluster }}.txt"
           summary_file="pr-check-summary-${{ matrix.cluster }}.md"
@@ -375,6 +397,7 @@ jobs:
             fi
 
             diff_file="$tmp_root/$(basename "$file").diff"
+            ci_log "kubediff ${file}"
             set +e
             kubediff --skip-secrets -f "$file" > "$diff_file" 2>&1
             diff_code=$?
@@ -385,6 +408,8 @@ jobs:
             elif [[ $diff_code -eq 1 ]]; then
               echo "Changes detected." >> "$summary_file"
             else
+              ci_error "kubediff failed for ${file} (exit ${diff_code})"
+              ci_dump "kubediff output ${file}" "$diff_file"
               echo "Cluster diff failed (exit ${diff_code})." >> "$summary_file"
               had_error="true"
             fi
@@ -406,10 +431,12 @@ jobs:
           cat "$summary_file" >> "$GITHUB_STEP_SUMMARY"
 
           if [[ "$had_error" == "true" ]]; then
+            ci_error "one or more kubediff runs failed; see the grouped output above"
             exit 1
           fi
 
           if [[ "${FLEET_BUNDLE_DIFF_ERROR:-}" == "true" ]]; then
+            ci_error "the Fleet bundle diff step reported a render failure; see that step's log"
             exit 1
           fi
 
@@ -417,7 +444,7 @@ jobs:
         if: steps.changed.outputs.has_files == 'true' && env.KUBECONFIG_B64 == ''
         shell: bash
         run: |
-          set -euo pipefail
+          . "$GITHUB_WORKSPACE/scripts/ci/lib.sh" || exit 1
           base_sha="${{ github.event.pull_request.base.sha }}"
           head_sha="${{ github.event.pull_request.head.sha }}"
           changed_file="changed-files-${{ matrix.cluster }}.txt"
@@ -452,6 +479,7 @@ jobs:
           cat "$summary_file" >> "$GITHUB_STEP_SUMMARY"
 
           if [[ "${FLEET_BUNDLE_DIFF_ERROR:-}" == "true" ]]; then
+            ci_error "the Fleet bundle diff step reported a render failure; see that step's log"
             exit 1
           fi
 
