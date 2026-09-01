@@ -1,7 +1,15 @@
 defaultNamespace: piko
 
+# HMAC secret lives in out-of-band Secret `piko-auth` (key hmac-secret-key).
+# Create it once on the cluster, then mint a JWT signed with that HMAC for agents:
+#   kubectl -n piko create secret generic piko-auth \
+#     --from-literal=hmac-secret-key="$(openssl rand -hex 32)"
+
 helm:
   chart: github.com/andydunstall/piko//operations/helm/piko?ref=v0.10.0
   releaseName: piko
   values:
     replicaCount: 1
+
+kustomize:
+  dir: overlays/auth
