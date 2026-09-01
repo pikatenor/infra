@@ -1,0 +1,61 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: piko-proxy
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  rules:
+    - host: "*.tnl.app.p1kachu.net"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: piko-http
+                port:
+                  number: 8000
+    - host: tnl.app.p1kachu.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: piko-http
+                port:
+                  number: 8000
+  tls:
+    - hosts:
+        - "*.tnl.app.p1kachu.net"
+        - tnl.app.p1kachu.net
+      secretName: tnl-cert
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: piko-upstream
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.tls.certresolver: default
+spec:
+  rules:
+    - host: piko.app.p1kachu.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: piko-http
+                port:
+                  number: 8001
+  tls:
+    - hosts:
+        - piko.app.p1kachu.net
+      secretName: wild-cert

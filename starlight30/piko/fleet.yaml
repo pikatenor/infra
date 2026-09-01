@@ -1,0 +1,7 @@
+defaultNamespace: piko
+
+helm:
+  chart: github.com/andydunstall/piko//operations/helm/piko?ref=v0.10.0
+  releaseName: piko
+  values:
+    replicaCount: 1
