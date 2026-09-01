@@ -27,7 +27,7 @@ jobs:
         id: changed
         shell: bash
         run: |
-          set -euo pipefail
+          . "$GITHUB_WORKSPACE/scripts/ci/lib.sh" || exit 1
 
           before="${{ github.event.before }}"
           after="${{ github.sha }}"
@@ -37,6 +37,8 @@ jobs:
           else
             git diff --name-only "$before" "$after" -- '*.yml' '*.yaml' > changed-files.txt
           fi
+
+          ci_dump "changed YAML files (${before}..${after})" changed-files.txt
 
           if [[ -s changed-files.txt ]]; then
             echo "has_files=true" >> "$GITHUB_OUTPUT"
@@ -61,11 +63,11 @@ jobs:
         if: steps.changed.outputs.has_files == 'true' && env.KUBECONFIG_B64 != ''
         shell: bash
         run: |
-          set -euo pipefail
+          . "$GITHUB_WORKSPACE/scripts/ci/lib.sh" || exit 1
           mkdir -p "$HOME/.kube"
           echo "$KUBECONFIG_B64" | base64 --decode > "$HOME/.kube/config"
           chmod 600 "$HOME/.kube/config"
-          kubectl config use-context local
+          ci_run kubectl config use-context local
 
       - name: Skip when kubeconfig is not configured
         if: steps.changed.outputs.has_files == 'true' && env.KUBECONFIG_B64 == ''
@@ -84,7 +86,7 @@ jobs:
           TARGET_SHA: ${{ github.sha }}
           REPO_NAME: ${{ github.repository }}
         run: |
-          set -euo pipefail
+          . "$GITHUB_WORKSPACE/scripts/ci/lib.sh" || exit 1
 
           repo_https="https://github.com/${REPO_NAME}.git"
           repo_https_nogit="https://github.com/${REPO_NAME}"
@@ -109,6 +111,11 @@ jobs:
           )
 
           if [[ ${#gitrepos[@]} -eq 0 ]]; then
+            ci_error "no Fleet GitRepo matches ${REPO_NAME} (tried ${repo_https}, ${repo_https_nogit}, ${repo_ssh}, name=${repo_slug_name})"
+            ci_group "GitRepos visible to this token"
+            kubectl get gitrepos.fleet.cattle.io -A \
+              -o custom-columns=NAMESPACE:.metadata.namespace,NAME:.metadata.name,REPO:.spec.repo || true
+            ci_endgroup
             {
               echo "## Fleet Post Merge Checks"
               echo
@@ -154,9 +161,11 @@ jobs:
               fi
 
               status_report+="- ${item}: Ready=${ready}, Commit=${commit:-<empty>}\n"
+              ci_log "[${elapsed}s/${timeout_sec}s] ${item}: Ready=${ready}, Commit=${commit:-<empty>} (want ${TARGET_SHA})"
             done
 
             if [[ "$all_ok" == "true" ]]; then
+              ci_log "convergence completed after ${elapsed}s"
               {
                 echo "Convergence completed."
                 echo
@@ -166,6 +175,13 @@ jobs:
             fi
 
             if (( elapsed >= timeout_sec )); then
+              ci_error "convergence timeout after ${timeout_sec}s; expected commit ${TARGET_SHA}"
+              for item in "${gitrepos[@]}"; do
+                ci_group "conditions: ${item}"
+                kubectl -n "${item%/*}" get gitrepo.fleet.cattle.io "${item#*/}" \
+                  -o jsonpath='{range .status.conditions[*]}{.type}={.status} {.reason} {.message}{"\n"}{end}' || true
+                ci_endgroup
+              done
               {
                 echo "Convergence timeout after ${timeout_sec}s."
                 echo

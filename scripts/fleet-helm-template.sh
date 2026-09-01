@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 # Render Kubernetes manifests from a Fleet helm bundle (fleet.yaml + optional valuesFiles).
 # Used by Fleet PR CI to diff helm chart output without a cluster.
-set -euo pipefail
+_lib="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/ci/lib.sh"
+if [[ -r "$_lib" ]]; then
+  . "$_lib"
+else
+  set -euo pipefail
+fi
 
 bundle_dir="${1:?bundle directory (contains fleet.yaml)}"
 fleet_yaml="${bundle_dir}/fleet.yaml"
@@ -20,7 +25,6 @@ values_file="$(mktemp)"
 trap 'rm -f "$values_file"' EXIT
 
 python3 - "$fleet_yaml" "$bundle_dir" "$values_file" <<'PY'
-import json
 import os
 import subprocess
 import sys
@@ -74,7 +78,16 @@ elif chart:
         if ref:
             clone_cmd.extend(["--branch", ref])
         clone_cmd.extend(["https://" + repo_part, tmpdir])
-        subprocess.run(clone_cmd, check=True, capture_output=True, text=True)
+        print("+ " + " ".join(clone_cmd), file=sys.stderr)
+        clone = subprocess.run(clone_cmd, capture_output=True, text=True)
+        if clone.returncode != 0:
+            print(clone.stdout, file=sys.stderr, end="")
+            print(clone.stderr, file=sys.stderr, end="")
+            print(
+                f"git clone failed (exit {clone.returncode}) for chart {chart}",
+                file=sys.stderr,
+            )
+            sys.exit(clone.returncode)
         chart = os.path.join(tmpdir, subpath)
     helm_args.append(chart)
 else:
@@ -93,5 +106,9 @@ for vf in helm.get("valuesFiles") or []:
         sys.exit(1)
     helm_args.extend(["-f", path])
 
-subprocess.run(helm_args, check=True)
+print("+ " + " ".join(helm_args), file=sys.stderr)
+proc = subprocess.run(helm_args)
+if proc.returncode != 0:
+    print(f"helm template failed (exit {proc.returncode})", file=sys.stderr)
+    sys.exit(proc.returncode)
 PY
