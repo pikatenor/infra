@@ -1,0 +1,19 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: piko-http
+spec:
+  type: ClusterIP
+  ports:
+    - name: proxy
+      port: 8000
+      targetPort: proxy
+      protocol: TCP
+    - name: upstream
+      port: 8001
+      targetPort: upstream
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: piko
+    app.kubernetes.io/instance: piko
