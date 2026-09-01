@@ -106,7 +106,7 @@ jobs:
         shell: bash
         run: |
           . "$GITHUB_WORKSPACE/scripts/ci/lib.sh" || exit 1
-          ci_run curl -sSL -o fleet https://github.com/rancher/fleet/releases/latest/download/fleet-linux-amd64
+          ci_run curl -fsSL -o fleet https://github.com/rancher/fleet/releases/latest/download/fleet-linux-amd64
           chmod +x fleet
           sudo mv fleet /usr/local/bin/fleet
           ci_run fleet --version
@@ -358,7 +358,7 @@ jobs:
         run: |
           . "$GITHUB_WORKSPACE/scripts/ci/lib.sh" || exit 1
           tmpdir="$(mktemp -d)"
-          curl -sSL "https://github.com/sepich/kubediff/releases/download/${KUBEDIFF_VERSION}/kubediff-linux-amd64.tar.gz" \
+          curl -fsSL "https://github.com/sepich/kubediff/releases/download/${KUBEDIFF_VERSION}/kubediff-linux-amd64.tar.gz" \
             | tar -xz -C "$tmpdir"
           sudo mv "$tmpdir/kubediff" /usr/local/bin/kubediff
           ci_run kubediff -v
