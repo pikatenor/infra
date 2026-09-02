@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: piping
-          image: nwtgck/piping-server:v1.12.9@sha256:240a8f4c564fd9cf63f34a30a6c101cf92d4c20d2c582383326ebe4a226251b1
+          image: nwtgck/piping-server:v1.12.9@sha256:932f868362af4df552d030a53392665622aeffedef498f1935eebdd503f67dd4
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
