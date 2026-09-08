@@ -54,8 +54,23 @@ jobs:
           git diff --name-only "$base_sha" "$head_sha" -- '*.yml' '*.yaml' > "$all_changed_file"
           grep -E "^${target_dir}.*\.(yml|yaml)$" "$all_changed_file" > "$changed_file" || true
 
+          existing_file="existing-files-${{ matrix.cluster }}.txt"
+          deleted_file="deleted-files-${{ matrix.cluster }}.txt"
+          : > "$existing_file"
+          : > "$deleted_file"
+          while IFS= read -r f; do
+            [[ -n "$f" ]] || continue
+            if [[ -f "$f" ]]; then
+              printf '%s\n' "$f" >> "$existing_file"
+            else
+              printf '%s\n' "$f" >> "$deleted_file"
+            fi
+          done < "$changed_file"
+
           ci_dump "changed YAML files in PR (all clusters)" "$all_changed_file"
           ci_dump "changed YAML files under ${target_dir}" "$changed_file"
+          ci_dump "existing YAML files under ${target_dir}" "$existing_file"
+          ci_dump "deleted YAML files under ${target_dir}" "$deleted_file"
 
           if [[ -s "$changed_file" ]]; then
             {
@@ -90,9 +105,9 @@ jobs:
         # manifests ignored). Do not pass `-d` here, or it overrides that file.
         run: |
           . "$GITHUB_WORKSPACE/scripts/ci/lib.sh" || exit 1
-          mapfile -t files < "changed-files-${{ matrix.cluster }}.txt"
+          mapfile -t files < "existing-files-${{ matrix.cluster }}.txt"
           if [[ ${#files[@]} -eq 0 ]]; then
-            ci_log "no changed files to lint"
+            ci_log "no existing files to lint (changed YAML was deleted, or none matched)"
             exit 0
           fi
           ci_run yamllint "${files[@]}"
@@ -163,6 +178,13 @@ jobs:
 
             ci_log "rendering bundle ${bundle_dir}"
             echo "#### ${bundle_dir}" >> "$fleet_summary_file"
+
+            if [[ ! -f "$fleet_file" ]]; then
+              ci_log "bundle ${bundle_dir} removed at HEAD; skipping render"
+              echo "Bundle removed in this PR." >> "$fleet_summary_file"
+              echo >> "$fleet_summary_file"
+              continue
+            fi
 
             mkdir -p "$tmp_root/base"
             mkdir -p "$tmp_root/out"
@@ -389,6 +411,12 @@ jobs:
           had_error="false"
           while IFS= read -r file; do
             echo "#### ${file}" >> "$summary_file"
+
+            if [[ ! -f "$file" ]]; then
+              echo "Deleted in this PR; skipped cluster diff." >> "$summary_file"
+              echo >> "$summary_file"
+              continue
+            fi
 
             if [[ "$(basename "$file")" =~ ^fleet\.ya?ml$ ]]; then
               echo "Skipped (Fleet bundle config, not a cluster manifest)." >> "$summary_file"
