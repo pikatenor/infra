@@ -6,7 +6,7 @@ metadata:
   name: rancher-critical
   labels: 
     app: rancher
-    chart: rancher-2.13.7
+    chart: rancher-2.14.5
     heritage: Helm
     release: rancher
 value: 1000000000
@@ -21,7 +21,7 @@ metadata:
   name: rancher
   labels:
     app: rancher
-    chart: rancher-2.13.7
+    chart: rancher-2.14.5
     heritage: Helm
     release: rancher
 
@@ -33,7 +33,7 @@ metadata:
   name: rancher-config
   labels: 
     app: rancher
-    chart: rancher-2.13.7
+    chart: rancher-2.14.5
     heritage: Helm
     release: rancher
     app.kubernetes.io/part-of: "rancher"
@@ -48,7 +48,7 @@ metadata:
   name: rancher
   labels:
     app: rancher
-    chart: rancher-2.13.7
+    chart: rancher-2.14.5
     heritage: Helm
     release: rancher
 subjects:
@@ -68,7 +68,7 @@ metadata:
   name: rancher
   labels:
     app: rancher
-    chart: rancher-2.13.7
+    chart: rancher-2.14.5
     heritage: Helm
     release: rancher
 spec:
@@ -78,9 +78,29 @@ spec:
     protocol: TCP
     name: http
   - port: 443
-    targetPort: 444
+    targetPort: 443
     protocol: TCP
-    name: https-internal
+    name: https
+  selector:
+    app: rancher
+---
+# Source: rancher/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: rancher-internal
+  labels:
+    app: rancher
+    chart: rancher-2.14.5
+    heritage: Helm
+    release: rancher
+spec:
+  type: ClusterIP
+  ports:
+    - port: 443
+      targetPort: 444
+      protocol: TCP
+      name: https-internal
   selector:
     app: rancher
 
@@ -93,7 +113,7 @@ metadata:
   annotations:
   labels:
     app: rancher
-    chart: rancher-2.13.7
+    chart: rancher-2.14.5
     heritage: Helm
     release: rancher
 spec:
@@ -140,11 +160,15 @@ spec:
           effect: "NoSchedule"
           operator: "Equal"
       containers:
-      - image: "registry.rancher.com/rancher/rancher:v2.13.7"
+      - image: "registry.rancher.com/rancher/rancher:v2.14.5"
         imagePullPolicy: IfNotPresent
         name: rancher
         ports:
         - containerPort: 80
+          protocol: TCP
+        - containerPort: 443
+          protocol: TCP
+        - containerPort: 444
           protocol: TCP
         - containerPort: 6666
           protocol: TCP
@@ -195,22 +219,19 @@ spec:
       volumes:
 
 ---
-# Source: rancher/templates/ingress.yaml
+# Source: rancher/templates/ingate/ingress.yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: rancher
   labels:
     app: rancher
-    chart: rancher-2.13.7
+    chart: rancher-2.14.5
     heritage: Helm
     release: rancher
   annotations:
     cert-manager.io/issuer: rancher
     cert-manager.io/issuer-kind: Issuer
-    nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "1800"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "1800"
 spec:
   rules:
   - host: rancher.yuzu.p1kachu.net  # hostname to access rancher server
@@ -229,14 +250,14 @@ spec:
     secretName: tls-rancher-ingress
 
 ---
-# Source: rancher/templates/issuer-letsEncrypt.yaml
+# Source: rancher/templates/ingate/issuer-letsEncrypt.yaml
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   name: rancher
   labels:
     app: rancher
-    chart: rancher-2.13.7
+    chart: rancher-2.14.5
     heritage: Helm
     release: rancher
 spec:
@@ -246,6 +267,6 @@ spec:
     privateKeySecretRef:
       name: letsencrypt-production
     solvers:
-    - http01:
-        ingress:
-          class: traefik
+      - http01:
+          ingress:
+            class: traefik
