@@ -33,6 +33,25 @@
         "digest"
       ],
       "automerge": true
+    },
+    {
+      "matchManagers": ["regex"],
+      "description": "README version bumps are notification-only;",
+      "automerge": false,
+      "prBodyNotes": [
+        ":warning: This only updates the documented version. Before merging, re-render and apply templates manually, or the deployed version will drift."
+      ]
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Track the pinned rancher version in the manual upgrade procedure",
+      "fileMatch": ["^yuzu/cattle-system/README\\.md$"],
+      "matchStrings": ["helm template\\s+\\S+\\s+\\S+/rancher\\b[^\\n]*--version (?<currentValue>\\S+)"],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "rancher/rancher",
+      "extractVersionTemplate": "^v?(?<version>.+)$"
     }
   ],
   "kubernetes": {
