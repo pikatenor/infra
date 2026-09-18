@@ -48,6 +48,13 @@ spec:
     - host: piko.app.p1kachu.net
       http:
         paths:
+          - path: /_piko
+            pathType: Prefix
+            backend:
+              service:
+                name: piko-http
+                port:
+                  number: 8000
           - path: /
             pathType: Prefix
             backend:
