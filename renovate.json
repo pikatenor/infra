@@ -36,8 +36,10 @@
     },
     {
       "matchManagers": ["regex"],
+      "matchPackageNames": ["rancher/rancher"],
       "description": "README version bumps are notification-only;",
       "automerge": false,
+      "separateMinorPatch": true,
       "prBodyNotes": [
         ":warning: This only updates the documented version. Before merging, re-render and apply templates manually, or the deployed version will drift."
       ]
