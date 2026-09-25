@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: pyload-ng
-          image: lscr.io/linuxserver/pyload-ng:latest@sha256:5161f354a2a5d995f87c8cdf4e2d24ed58cdadb14d0fc4deee466ff03cab8755
+          image: lscr.io/linuxserver/pyload-ng:latest@sha256:4cec0a2a8c181ec00c6daac085f318b09424a3a0aff60efa2908eef8ae3eeff8
           imagePullPolicy: Always
           readinessProbe:
             failureThreshold: 3
