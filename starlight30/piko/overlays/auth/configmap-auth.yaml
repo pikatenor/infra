@@ -8,6 +8,11 @@ data:
       node_id_prefix: ${POD_NAME}-
       join:
         - piko
+    proxy:
+      timeout: 0s
+      http:
+        read_timeout: 0s
+        write_timeout: 0s
     upstream:
       auth:
         hmac_secret_key: ${PIKO_HMAC_SECRET_KEY}
