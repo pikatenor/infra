@@ -27,7 +27,7 @@ spec:
           value: Asia/Tokyo
         - name: USE_JSON
           value: "true"
-        image: ghcr.io/linuxserver/mstream:6.30.0@sha256:2e1577a42edf40ee8d1769ba30d9f5d236edf7839a6ffedf0a5a2bbfed631fb3
+        image: ghcr.io/linuxserver/mstream:6.30.0@sha256:896225514e635e6c8084ff6715f3a35f1c74b17d70cb5abbee00c47ece477ccb
         imagePullPolicy: Always
         readinessProbe:
           failureThreshold: 5
