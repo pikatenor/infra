@@ -18,6 +18,7 @@ data:
               - set(attributes["http.route"], Concat([attributes["server.address"], attributes["url.path"]], "")) where span.kind == SPAN_KIND_SERVER and attributes["http.route"] == nil and attributes["server.address"] != nil and attributes["url.path"] != nil
               - set(attributes["http.url"], Concat([attributes["url.scheme"], "://", attributes["server.address"], attributes["url.path"]], "")) where span.kind == SPAN_KIND_SERVER and attributes["http.url"] == nil and IsMatch(attributes["url.scheme"], "^https?$") and attributes["server.address"] != nil and attributes["url.path"] != nil
               - set(attributes["url.full"], attributes["http.url"]) where span.kind == SPAN_KIND_SERVER and attributes["url.full"] == nil and attributes["http.url"] != nil
+              - set(attributes["http.client_ip"], attributes["client.address"]) where span.kind == SPAN_KIND_SERVER and attributes["http.client_ip"] == nil and attributes["client.address"] != nil
               - delete_key(attributes, "url.query") where span.kind == SPAN_KIND_SERVER and IsMatch(attributes["url.query"], "REDACTED")
       batch:
         timeout: 5s
