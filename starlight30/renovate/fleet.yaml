@@ -1,0 +1,30 @@
+defaultNamespace: renovate
+
+helm:
+  chart: oci://ghcr.io/renovatebot/charts/renovate
+  version: 46.369.1
+
+  values:
+    image:
+      useFull: true
+
+    cronjob:
+      schedule: "0 4 * * *"
+      timeZone: Asia/Tokyo
+      concurrencyPolicy: Forbid
+
+    existingSecret: renovate-env
+
+    renovate:
+      persistence:
+        cache:
+          enabled: true
+          storageSize: 2Gi
+      config: |
+        {
+          "platform": "forgejo",
+          "endpoint": "http://starlight30-starlight30-forgejo-http.forgejo.svc.cluster.local:3000/api/v1",
+          "autodiscover": true,
+          "gitUrl": "endpoint",
+          "gitAuthor": "Renovate Bot <renovate@p1kachu.net>"
+        }
