@@ -37,6 +37,7 @@ spec:
           name: http
           protocol: TCP
         resources: {}
+  replicas: 0
 
 ---
 apiVersion: v1
