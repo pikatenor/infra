@@ -2,7 +2,7 @@ defaultNamespace: renovate
 
 helm:
   chart: oci://ghcr.io/renovatebot/charts/renovate
-  version: 46.381.6
+  version: 46.397.1
 
   values:
     image:
