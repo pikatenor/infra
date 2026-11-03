@@ -19,7 +19,7 @@ spec:
       namespace: default
     spec:
       containers:
-        - image: nico640/docker-unms:3.1.69@sha256:bebfd040e2eae6cb362c943be79dd904069e273c479f81caf7b3a06abc7f1fb8
+        - image: nico640/docker-unms:3.1.70@sha256:59eb621788426fede06d47d333afc12237a04b4820946738f40a694d3085605c
           imagePullPolicy: Always
           name: uisp
           ports:
