@@ -1,0 +1,180 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    workload.user.cattle.io/workloadselector: deployment-chopin-chopin
+  name: chopin
+  namespace: chopin
+spec:
+  replicas: 1
+  # One Chopin process may write the database; also avoids RWO volume races.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: deployment-chopin-chopin
+  template:
+    metadata:
+      labels:
+        workload.user.cattle.io/workloadselector: deployment-chopin-chopin
+    spec:
+      imagePullSecrets:
+        - name: c.p1kachu.net
+      initContainers:
+        # local-path/longhorn volumes are root-owned; the app runs as the
+        # image's unprivileged `bun` user (uid 1000)
+        - name: chown-state
+          image: c.p1kachu.net/chopin
+          imagePullPolicy: Always
+          securityContext:
+            runAsUser: 0
+          command:
+            - sh
+            - -c
+            - chown -R 1000:1000 /var/lib/chopin
+          volumeMounts:
+            - name: chopin-state
+              mountPath: /var/lib/chopin
+        # Native sidecar (k8s >= 1.29): stays running after init, and its
+        # startupProbe gates the app container, so migrations never race the
+        # database coming up
+        - name: postgres
+          image: postgres:17-alpine@sha256:3540c0362c809df084ffac0ae69fe794515f9de92692f02178bcdce0ef0302ac
+          restartPolicy: Always
+          env:
+            - name: POSTGRES_USER
+              value: chopin
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: chopin-postgres
+                  key: postgres-password
+            - name: POSTGRES_DB
+              value: chopin
+            # subdirectory: the PVC root may hold lost+found
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          startupProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U chopin -d chopin
+            failureThreshold: 60
+            periodSeconds: 2
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U chopin -d chopin
+            failureThreshold: 3
+            periodSeconds: 5
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U chopin -d chopin
+            failureThreshold: 6
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+          volumeMounts:
+            - name: chopin-db
+              mountPath: /var/lib/postgresql/data
+      containers:
+        - name: chopin
+          image: c.p1kachu.net/chopin
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8787
+              name: http
+              protocol: TCP
+          envFrom:
+            - secretRef:
+                name: chopin
+          startupProbe:
+            failureThreshold: 60
+            httpGet:
+              path: /api/session
+              port: http
+              scheme: HTTP
+            periodSeconds: 2
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /api/session
+              port: http
+              scheme: HTTP
+            periodSeconds: 5
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /api/session
+              port: http
+              scheme: HTTP
+            periodSeconds: 30
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 1Gi
+          volumeMounts:
+            - name: chopin-state
+              mountPath: /var/lib/chopin
+      volumes:
+        - name: chopin-state
+          persistentVolumeClaim:
+            claimName: chopin-state
+        - name: chopin-db
+          persistentVolumeClaim:
+            claimName: chopin-db
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: chopin
+  namespace: chopin
+spec:
+  ports:
+    - name: http
+      port: 8787
+      targetPort: http
+  selector:
+    workload.user.cattle.io/workloadselector: deployment-chopin-chopin
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: chopin
+  namespace: chopin
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.tls.certresolver: default
+spec:
+  rules:
+    - host: chopin.app.p1kachu.net
+      http:
+        paths:
+          - backend:
+              service:
+                name: chopin
+                port:
+                  number: 8787
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - chopin.app.p1kachu.net
+      secretName: wild-cert
