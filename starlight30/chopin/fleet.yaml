@@ -1,0 +1,20 @@
+defaultNamespace: chopin
+
+# Chopin (githubnext/chopin) — collaborative authoring server.
+# Single process + PostgreSQL 17 sidecar in one pod; the image's default CMD
+# applies migrations before starting the server.
+#
+# Out-of-band (gitignored):
+#   - Secret `chopin`          — app env (envFrom): DATABASE_URL, APP_ORIGIN,
+#                                GITHUB_APP_*, SESSION_ENCRYPTION_KEY, JEV_API_KEY, ...
+#   - Secret `chopin-postgres` — POSTGRES_PASSWORD for the sidecar
+#   - docker-registry Secret `c.p1kachu.net` — image pull secret
+#
+# The image is not published upstream; build and push manually from the chopin
+# checkout:
+#   docker build -t c.p1kachu.net/chopin:latest <chopin checkout>
+#   docker push c.p1kachu.net/chopin:latest
+#
+# HARNESS=remote: Planner turns run in attached clients (chopin connector), so
+# the server holds no model credentials. JEV_API_KEY backs the decisions
+# classifier, which is required whenever the Planner is enabled.
