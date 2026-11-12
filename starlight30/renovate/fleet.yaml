@@ -19,6 +19,7 @@ helm:
       persistence:
         cache:
           enabled: true
+          storageClass: local-path
           storageSize: 2Gi
       config: |
         {
