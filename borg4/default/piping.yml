@@ -16,7 +16,7 @@ spec:
     spec:
       nodeName: juno4a
       containers:
-      - image: nwtgck/piping-server:v1.12.9@sha256:03b018358362ddb479004e56a9245ac05f9e9bf3502ab26a8c84c1a93a50a147
+      - image: nwtgck/piping-server:v1.12.9@sha256:31452a639d13b99702d8c6eb232cf704a7ddb43f7017e781abd514b77925ffc4
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 3
