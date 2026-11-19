@@ -40,7 +40,7 @@ spec:
         # startupProbe gates the app container, so migrations never race the
         # database coming up
         - name: postgres
-          image: postgres:17-alpine@sha256:a77aa70e641402a21411b92b721c58d10f23b50ae5fdd2333efd22d166e1e5f7
+          image: postgres:18-alpine@sha256:ff64c9e3bdf8e2120107d3559de8db314e8305f7e38c5105903c6295876738ff
           restartPolicy: Always
           env:
             - name: POSTGRES_USER
